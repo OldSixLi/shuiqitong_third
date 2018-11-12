@@ -313,11 +313,14 @@ public class TaxService {
         Map<String, Object> map = new HashMap<>(2);
         // 若员工信息不存在，调用微信接口获取成员信息，并进行保存
         if (employeeInfo == null) {
+            Map<String, Object> accessTokeMap = null;
             String accessToken;
             if (Constant.IS_SELF_BUILT_LOGIN) {
                 accessToken = accessTokenService.getAccessTokenBySelfBuilt("phone");
             } else {
-                accessToken = accessTokenService.getAccessTokenByPermanentCode(corpId, "ent");
+                accessTokeMap = accessTokenService.getAccessTokenByPermanentCode(corpId, Constant.GET_INFO_TYPE_TAX);
+                // 获取当前企业token
+                accessToken = (String) accessTokeMap.get("accessToken");
             }
             String url = GET_USER_DETAIL_INFO_URL;
             url = String.format(url, accessToken, userId);

@@ -94,7 +94,7 @@ public class SelfbuiltService {
                 // 获取企业微信返回的过期时间
                 Long expiresIn = jsonObject.getLong("expires_in");
                 // 设置提前1分钟过期
-                redisUtils.set("selfBuiltAccessToken" + type, accessToken, expiresIn - Constant.ENT_ACCESSTOKEN_ADVANCE_TIME);
+                redisUtils.set("selfBuiltAccessToken" + type, accessToken, expiresIn - Constant.ACCESS_TOKEN_ADVANCE_TIME);
             }
         }
         log.info("获取成功" + type + "，更新缓存中的信息" + accessToken);

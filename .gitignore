@@ -35,7 +35,8 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
-back_service
+back_service/
+.svn/
 
 # TypeScript v1 declaration files
 typings/

@@ -78,7 +78,7 @@ public class DruidConfig {
             Class.forName(diver);
             // try自动关闭
             try (Connection connection = DriverManager.getConnection(url, username, password);
-                 PreparedStatement preparedStatement = connection.prepareStatement("select * from constant_info");
+                 PreparedStatement preparedStatement = connection.prepareStatement("select * from third_config");
                  ResultSet resultSet = preparedStatement.executeQuery()) {
                 properties.clear();
                 // 将读取到的配置信息放入properties文件中
@@ -97,6 +97,7 @@ public class DruidConfig {
             PropertiesPropertySource constants = new PropertiesPropertySource("application", properties);
             // 没找到默认添加到第一位
             propertySources.addFirst(constants);
+            logger.error("动态加载properties成功");
         } catch (Exception e) {
             logger.error("动态加载properties失败");
         }

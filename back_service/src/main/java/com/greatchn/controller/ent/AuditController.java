@@ -141,7 +141,7 @@ public class AuditController extends BaseController {
                 // 获取缓存中的信息
                 enterpriseInfo = (EnterpriseInfo) redisMap.get("entInfo");
             } else {
-                enterpriseInfo = enterpriseService.findEnterpriseByCorpId(corpId, "all");
+                enterpriseInfo = enterpriseService.findEnterpriseByCorpId(corpId, null);
             }
             //查询企业信息，企业审核信息
             if (enterpriseInfo != null) {
@@ -172,7 +172,7 @@ public class AuditController extends BaseController {
                 return Result.success(map);
             } else {
                 // 该企业未授权，或已被作废
-                return Result.fail("该企业未授权");
+                return Result.fail("该企业未授权或已被作废");
             }
         }
     }

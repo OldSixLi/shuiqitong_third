@@ -13,35 +13,66 @@ public class Constant {
     public static final Integer REQUEST_TIME_OUT_DEFALUT = 5000;
 
     /**
-     * 第三方应用的SuiteId
+     * 服务商的企业微信企业id
      */
-    public static final String PROVIDER_SUITE_ID = "";
+    public static final String PROVIDER_CORP_ID = "wxa059996e5d72516b";
 
     /**
-     * 第三方应用服务商的企业微信企业id
+     * 服务商的secret
      */
-    public static final String PROVIDER_CORP_ID = "";
+    public static final String PROVIDER_SECRET = "3_Geu0XCltoo9dF4lLpiJPnqFPn8J27QF9Ihte5eQugSsyO-9KVR03vEtWp81aOZ";
 
     /**
-     * 第三方应用的secret
+     * 税企通企业版第三方应用的suite_Id
      */
-    public static final String PROVIDER_SECRET = "";
+    public static final String ENTERPRISE_SUITE_ID = "wx37df32191487c6e8";
 
     /**
-     * 第三方应用服务商的EncodingAESKey
+     * 税企通企业版第三方应用的secret
      */
-    public static final String PROVIDER_ENCODING_AES_KEY = "";
+    public static final String ENTERPRISE_SUITE_SECRET = "CkwL6788NLfLU4Ngm1uicrxxXarLqtVqnMQB6egY_xo";
 
     /**
-     * suiteAccessToken有效时长（毫秒）
+     * 税企通企业版第三方应用回调配置中生成签名的token
      */
-    public static final long SUITE_ACCESS_TOKEN_TIME = 2 * 60 * 60 * 1000;
+    public static final String ENTERPRISE_CALLBACK_TOKEN = "TtTr41okUYRmOsPtkLkbMnmbKKRDYh";
 
     /**
-     * 提前获取accessToken时长（毫秒）
+     * 税企通企业版第三方应用回调配置的EncodingAESKey
      */
-    public static final long ACCESS_TOKEN_ADVANCE_TIME = 3 * 60 * 1000;
+    public static final String ENTERPRISE_CALLBACK_ENCODING_AES_KEY = "R12HcvicvjQiODdLICWDyDPmKNtgsmPIFtACWWOjYzv";
 
+
+    /**
+     * 税企通税务局第三方应用的suite_Id
+     */
+    public static final String TAX_SUITE_ID = "";
+
+    /**
+     * 税企通税务局第三方应用的secret
+     */
+    public static final String TAX_SUITE_SECRET = "";
+
+    /**
+     * 税企通税务局第三方应用回调配置中生成签名的token
+     */
+    public static final String TAX_CALLBACK_TOKEN = "";
+
+    /**
+     * 税企通税务局第三方应用回调配置的EncodingAESKey
+     */
+    public static final String TAX_CALLBACK_ENCODING_AES_KEY = "";
+
+
+    /**
+     * 获取不同类型的信息-企业
+     */
+    public static final String GET_INFO_TYPE_ENT = "ent";
+
+    /**
+     * 获取不同类型的信息-税务分局
+     */
+    public static final String GET_INFO_TYPE_TAX = "tax";
     /**
      * 是否启用超级校验码
      */
@@ -66,6 +97,17 @@ public class Constant {
      */
     public static final String NORMAL_DESCRIPTION = "普通用户";
 
+
+    /**
+     * 除管理员外，其他角色不可添加的权限
+     */
+    public static final String TAX_CANNNOT_ADD_TO_ROLE_OTHIER_THAN_MANAGER = "system-userlist,system-role";
+
+    /**
+     * 所有角色必有的权限
+     */
+    public static final String TAX_ALL_ROLE_HAVE_RIGHT = "system-account";
+
     /**
      * token过期时间
      */
@@ -77,9 +119,9 @@ public class Constant {
     public static final Integer TAX_TOKEN_TIME_OUT = 60 * 60;
 
     /**
-     * accessToken提起过期时间
+     * accessToken提前过期时间（60秒）
      */
-    public static final Integer ENT_ACCESSTOKEN_ADVANCE_TIME = 60;
+    public static final Integer ACCESS_TOKEN_ADVANCE_TIME = 60;
 
     /**
      * 是否为自建应用
@@ -129,8 +171,8 @@ public class Constant {
 
     /**
      * 有效-Y
-     * */
-    public static final String EFFECTIVE_STATE="Y";
+     */
+    public static final String EFFECTIVE_STATE = "Y";
 
 
     //////////////////企业微信-自建应用//////////////////////////
@@ -176,18 +218,6 @@ public class Constant {
      * 税务分局自建应用的secret
      */
     public static final String TAX_NORMAL_SECRET = ConstantUtil.getValue("SELF_BUILT_TAX_NORMAL_SECRET");
-
-
-    /**
-     * 除管理员外，其他角色不可添加的权限
-     */
-    public static final String TAX_CANNNOT_ADD_TO_ROLE_OTHIER_THAN_MANAGER = "system-userlist,system-role";
-
-    /**
-     * 所有角色必有的权限
-     */
-    public static final String TAX_ALL_ROLE_HAVE_RIGHT = "system-account";
-
 
 
 }

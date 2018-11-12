@@ -128,7 +128,7 @@ public class EnterpriseService {
         String userRoleSql = "select count(ID) as num from ent_user_role where USER_ID=? and ROLE_ID=?";
         Map<String, Type> types = new HashMap<>(1);
         types.put("num", LongType.INSTANCE);
-        Map<String, Object> map = baseDao.uniqueBySQL(userRoleSql, types,userId,entRoleInfo.getId());
+        Map<String, Object> map = baseDao.uniqueBySQL(userRoleSql, types, userId, entRoleInfo.getId());
         long num = (long) map.get("num");
         if (num <= 0) {
             // 删除当前企业的管理员用户
@@ -231,28 +231,36 @@ public class EnterpriseService {
     }
 
     /**
-     *
      * 获取用户拥有的角色信息
-     *
-     * */
+     */
     @Transactional(rollbackFor = Exception.class)
-    public List<Map<String,Object>> findUserRoleInfos(Integer id){
-        String sql="select eri.ID as roleId,eri.`NAME` as roleName,eri.DESCRIPTION as description from ent_user_role eur join ent_role_info eri on eur.ROLE_ID=eri.ID where eur.USER_ID=? GROUP BY eri.ID";
-        Map<String,Type> types=new HashMap<>(3);
-        types.put("roleId",IntegerType.INSTANCE);
-        types.put("roleName",StringType.INSTANCE);
-        types.put("description",StringType.INSTANCE);
-        List<Map<String,Object>> list=baseDao.queryBySQL(sql,types,id);
+    public List<Map<String, Object>> findUserRoleInfos(Integer id) {
+        String sql = "select eri.ID as roleId,eri.`NAME` as roleName,eri.DESCRIPTION as description from ent_user_role eur join ent_role_info eri on eur.ROLE_ID=eri.ID where eur.USER_ID=? GROUP BY eri.ID";
+        Map<String, Type> types = new HashMap<>(3);
+        types.put("roleId", IntegerType.INSTANCE);
+        types.put("roleName", StringType.INSTANCE);
+        types.put("description", StringType.INSTANCE);
+        List<Map<String, Object>> list = baseDao.queryBySQL(sql, types, id);
         return list;
     }
 
     /**
-     *
      * 根据企业id获取企业信息
-     *
-     * */
-    public EnterpriseInfo findEnterpriseInfoByEntId(Integer entId){
-        return baseDao.get(EnterpriseInfo.class,entId);
+     */
+    public EnterpriseInfo findEnterpriseInfoByEntId(Integer entId) {
+        return baseDao.get(EnterpriseInfo.class, entId);
     }
 
+
+    /**
+     * 校验是否已授权过
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void saveEnterpriseInfoByAuth(EnterpriseInfo newEnterpriseInfo) {
+        // 校验是否已存在有效的企业
+        EnterpriseInfo enterprisseInfo = findEnterpriseByCorpId(newEnterpriseInfo.getCorpId(), null);
+
+        // 若存在，删除原有企业，并将
+
+    }
 }

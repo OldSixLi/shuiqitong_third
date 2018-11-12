@@ -10,6 +10,9 @@ import com.greatchn.common.utils.RedisUtils;
 import com.greatchn.po.AuditInfo;
 import com.greatchn.po.EnterpriseInfo;
 import com.greatchn.po.TaxInfo;
+import com.greatchn.service.AuditService;
+import com.greatchn.service.ent.EnterpriseService;
+import com.greatchn.service.tax.TaxService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,6 +46,15 @@ public class TokenAuthorInterceptor implements HandlerInterceptor {
 
     @Resource
     RedisUtils redisUtils;
+
+    @Resource
+    EnterpriseService enterpriseService;
+
+    @Resource
+    AuditService auditService;
+
+    @Resource
+    TaxService taxService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -121,9 +134,21 @@ public class TokenAuthorInterceptor implements HandlerInterceptor {
                 if (StringUtils.isNotEmpty(taxInfoKey)) {
                     // 获取公司信息进行判断
                     Map<String, Object> taxInfoMap = (Map<String, Object>) redisUtils.get(taxInfoKey);
+                    String corpId = taxInfoKey.replace(RedisUtils.REDIS_PREFIX_TAX, "");
                     if (taxInfoMap == null || taxInfoMap.isEmpty()) {
-                        //公司信息不存在，请重新登录!
-                        msg = "-2";
+                        // 重新获取公式以及审核信息，并放入缓存
+                        TaxInfo taxInfo = taxService.findTaxInfoByCorpId(corpId, null);
+                        if (taxInfo != null) {
+                            // 查询企业审核信息
+                            AuditInfo auditInfo = auditService.getAuditInfoByEntTaxId(taxInfo.getId(), null, "1");
+                            taxInfoMap = new HashMap<>(2);
+                            taxInfoMap.put("taxInfo", taxInfo);
+                            taxInfoMap.put("auditInfo", auditInfo);
+                            redisUtils.set(taxInfoKey, taxInfoMap);
+                        } else {
+                            // 税务分局信息不存在，请重新登录!
+                            msg = "-2";
+                        }
                     } else {
                         TaxInfo taxInfo = (TaxInfo) taxInfoMap.get("taxInfo");
                         String effictiveStr = "Y";
@@ -151,9 +176,21 @@ public class TokenAuthorInterceptor implements HandlerInterceptor {
                 if (StringUtils.isNotEmpty(entInfoKey)) {
                     // 获取公司信息进行判断
                     Map<String, Object> entInfoMap = (Map<String, Object>) redisUtils.get(entInfoKey);
+                    String corpId = entInfoKey.replace(RedisUtils.REDIS_PREFIX_ENT, "");
                     if (entInfoMap == null || entInfoMap.isEmpty()) {
-                        //公司信息不存在，请重新登录!
-                        msg = "-2";
+                        // 重新获取公式以及审核信息，并放入缓存
+                        EnterpriseInfo enterpriseInfo = enterpriseService.findEnterpriseByCorpId(corpId, null);
+                        if (enterpriseInfo != null) {
+                            // 查询企业审核信息
+                            AuditInfo auditInfo = auditService.getAuditInfoByEntTaxId(enterpriseInfo.getId(), null, "1");
+                            entInfoMap = new HashMap<>(2);
+                            entInfoMap.put("entInfo", enterpriseInfo);
+                            entInfoMap.put("auditInfo", auditInfo);
+                            redisUtils.set(entInfoKey, entInfoMap);
+                        } else {
+                            //公司信息不存在，请重新登录!
+                            msg = "-2";
+                        }
                     } else {
                         EnterpriseInfo enterpriseInfo = (EnterpriseInfo) entInfoMap.get("entInfo");
                         String effictiveStr = "Y";

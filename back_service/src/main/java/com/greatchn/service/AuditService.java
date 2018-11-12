@@ -52,7 +52,7 @@ public class AuditService {
     @Transactional(rollbackFor = Exception.class)
     public String submissionOfAuditEnt(AuditInfo auditInfo, EnterpriseInfo info) {
         String message = null;
-        EnterpriseInfo enterpriseInfo = enterpriseService.findEnterpriseByCorpId(info.getCorpId(), "all");
+        EnterpriseInfo enterpriseInfo = enterpriseService.findEnterpriseByCorpId(info.getCorpId(), null);
         // 是否有有效的企业信息
         if (enterpriseInfo != null) {
             // 查询税务分局是否有效且存在

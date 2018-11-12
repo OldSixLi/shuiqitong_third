@@ -49,6 +49,8 @@ axios.defaults.headers.common['token'] = AUTH_TOKEN;
  * @param {*} err 
  */
 function errorHandler(err) {
+  if(err.response&&err.response.status){
+    
   if (err.response.status == 504 || err.response.status == 404) {
     Message.error({
       message: '请求服务失败，请重试！'
@@ -62,6 +64,11 @@ function errorHandler(err) {
       message: '未知错误!'
     });
   }
+}else{
+  Message.error({
+    message: '网络请求失败，请检查网络或联系管理员！'
+  });
+}
 }
 
 const successHandler = data => {

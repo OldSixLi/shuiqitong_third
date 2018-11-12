@@ -255,12 +255,15 @@ public class TaxLoginSrv {
         // 查询员工信息是否存在
         EmployeeInfo employeeInfo = enterpriseService.findEmplyeeInfo(corpId, userId);
         if (employeeInfo == null) {
+            Map<String, Object> map = null;
             // 获取当前企业token
             String accessToken;
             if (Constant.IS_SELF_BUILT_LOGIN) {
                 accessToken = accessTokenService.getAccessTokenBySelfBuilt("phone");
             } else {
-                accessToken = accessTokenService.getAccessTokenByPermanentCode(corpId, "tax");
+                map = accessTokenService.getAccessTokenByPermanentCode(corpId, Constant.GET_INFO_TYPE_TAX);
+                // 获取当前企业token
+                accessToken = (String) map.get("accessToken");
             }
             if (StringUtils.isNotEmpty(accessToken)) {
                 Map<String, Object> employeeMap = taxService.saveInitUserInfo(employeeInfo, corpId, userId, taxInfo.getId());
@@ -271,7 +274,7 @@ public class TaxLoginSrv {
                 }
             } else {
                 // 获取accessToken失败
-                resultMap.put(msgKey, "获取微信accessToken失败");
+                resultMap.put(msgKey, "获取微信accessToken失败" + (map == null ? "" : "失败原因" + (String) map.get("msg")));
             }
         }
         if (employeeInfo != null) {

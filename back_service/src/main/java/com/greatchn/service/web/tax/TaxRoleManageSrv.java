@@ -153,6 +153,7 @@ public class TaxRoleManageSrv {
      * @author zy 2018-10-29
      */
     @Transactional(rollbackFor = Exception.class)
+    @SuppressWarnings("unchecked")
     public String saveOrUpdateRoleRight(Integer roleId, String rightNames, Integer userId) {
         String msg = null;
         // 更新角色的修改人/修改时间
@@ -446,12 +447,15 @@ public class TaxRoleManageSrv {
         // 查询员工信息是否存在
         EmployeeInfo employeeInfo = enterpriseService.findEmplyeeInfo(corpId, userId);
         if (employeeInfo == null) {
+            Map<String, Object> map = null;
             // 获取当前企业token
             String accessToken;
             if (Constant.IS_SELF_BUILT_LOGIN) {
                 accessToken = accessTokenService.getAccessTokenBySelfBuilt("phone");
             } else {
-                accessToken = accessTokenService.getAccessTokenByPermanentCode(corpId, "tax");
+                map = accessTokenService.getAccessTokenByPermanentCode(corpId, Constant.GET_INFO_TYPE_TAX);
+                // 获取当前企业token
+                accessToken = (String) map.get("accessToken");
             }
             if (StringUtils.isNotEmpty(accessToken)) {
                 Map<String, Object> employeeMap = taxService.saveInitUserInfo(employeeInfo, corpId, userId, taxId);
