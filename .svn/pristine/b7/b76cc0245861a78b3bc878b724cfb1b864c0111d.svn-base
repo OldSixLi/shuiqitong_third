@@ -1,0 +1,4 @@
+baseDriver=com.mysql.jdbc.Driver
+baseUrl=jdbc:mysql://192.168.106.32:3306/tax_ent_communication?useUnicode=true&characterEncoding=UTF-8
+baseUser=root
+basePassword=root

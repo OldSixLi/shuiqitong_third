@@ -1,0 +1,10 @@
+ {
+    "jshint.enable":false, 
+    "tslint.enable":false, 
+    "standard.enable":false, 
+    "eslint.enable":false, 
+    "js-import.root": "packages",
+"js-import.alias": {
+    "@": "/src"
+}
+}
