@@ -60,9 +60,14 @@
                 })
                 .then(data => {
                   if (data.success) {
-                    callback();
+                    if(!data.bean){
+                      callback();
+                    }else{
+                      callback(`已存在此账号,请重新输入`);
+                    }
+                    
                   } else {
-                    callback(new Error('已存在此账号,请重新输入'));
+                    callback(new Error(data.message||'已存在此账号,请重新输入'));
                   }
                 })
                 .catch(() => {

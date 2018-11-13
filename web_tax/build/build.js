@@ -37,5 +37,10 @@ rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
       '  Tip: built files are meant to be served over an HTTP server.\n' +
       '  Opening index.html over file:// won\'t work.\n'
     ))
+
+
+    console.log(chalk.yellow("■■■■■■■■■■■■■web_tax_three■■■■■■■■■■■■■■"));
+    console.log(chalk.yellow(`web端税务局管理应用-上传服务器时请注意`));
+    console.log(chalk.yellow("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■"));
   })
 })

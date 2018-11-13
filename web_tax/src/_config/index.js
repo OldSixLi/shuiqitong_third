@@ -26,7 +26,7 @@ export const wxComId = "";
 /**
  * 微信应用代码 
  */
-export const appId = "wxd8ed9a1dc046aaf8";
+export const appId = "wxa059996e5d72516b";
 
 /**
  * 微信应用代码 
@@ -42,7 +42,10 @@ export const redirectUrl = "http://dev-ws.htyfw.com.cn:18303/auth";
  * 扫码登录的地址 
  * @returns 
  */
-export const wxUrl = `https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=${appId}&agentid=${agentId}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=`;
+// export const wxUrl = `https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=`;
+
+
+export const wxUrl =`https://open.work.weixin.qq.com/wwopen/sso/3rd_qrConnect?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=&usertype=member`
 
 /**
  * 只有管理员可启用的权限 

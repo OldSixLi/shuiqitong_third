@@ -10,6 +10,7 @@
 
 <script>
   import axios from 'axios';
+  import {wxUrl } from '@/_config'
   export default {
     name: 'HelloWorld',
     data() {
@@ -78,8 +79,7 @@
             this
             .$alert(`获取信息失败,请重新扫码登录`)
             .then(action => {
-              let goToDetail = "https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=wxa059996e5d72516b&agentid=1000009&redirect_uri=http%3a%2f%2fdev-ws.htyfw.com.cn%3a18002%2f&state=";
-              window.location.href = goToDetail;
+              window.location.href = wxUrl;
             });
           }
         }).catch(x=>{
@@ -87,8 +87,7 @@
           this
             .$alert(`获取信息失败,请重新扫码登录`)
             .then(action => {
-              let goToDetail = "https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=wxa059996e5d72516b&agentid=1000009&redirect_uri=http%3a%2f%2fdev-ws.htyfw.com.cn%3a18002%2f&state=";
-              window.location.href = goToDetail;
+              window.location.href = wxUrl;
             });
         });
       }

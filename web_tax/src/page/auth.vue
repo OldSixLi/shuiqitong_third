@@ -3,6 +3,7 @@
     <el-row style="margin-top: 10px;">
       <el-col :span="12" :offset="6">
         <!-- <h1 class="text-center">信息获取中</h1> -->
+        <h1>{{code}}</h1>
       </el-col>
     </el-row>
   </div>
@@ -11,10 +12,7 @@
 <script>
   import axios from 'axios';
   import { Loading } from 'element-ui';
-  import {
-    wxUrl
-  } from '@/_config';
-
+  import { wxUrl } from '@/_config';
   let loader= Loading.service({ fullscreen: true });
   export default {
     name: 'Auth',
@@ -45,13 +43,11 @@
         }
         return obj;
       },
-
       resolveErr(tip, path = 'login') {
         this.$alert(tip).then(data => {
             this.$to(path);
         })
       },
-
       getInfo() {
         let code = this.code;
         if (!code) {
@@ -121,16 +117,17 @@
     mounted() {
       // axios.defaults.headers.common['token'] = "666666";
       let obj = this.urlSearch();
-      this.code = obj.code || "";
-      if (this.code && !this.$store.state.isLogin) {
-        this.getInfo();
-      }else if(!this.code){
-        window.location.href = wxUrl;
-      }else if(this.$store.state.isLogin){
-        this.$to("/")
-      }else{
-        window.location.href = wxUrl;
-      }
+      // alert(obj.auth_code )
+      this.code = obj.auth_code || "";
+      // if (this.code && !this.$store.state.isLogin) {
+      //   this.getInfo();
+      // }else if(!this.code){
+      //   window.location.href = wxUrl;
+      // }else if(this.$store.state.isLogin){
+      //   this.$to("/")
+      // }else{
+      //   window.location.href = wxUrl;
+      // }
      
     },
     created() {
