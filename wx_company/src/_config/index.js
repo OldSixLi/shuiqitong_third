@@ -52,7 +52,7 @@ const prodUrl = `http://dev-ws.htyfw.com.cn:18300/`; //正式环境
 export const BASE_URL = process.env.NODE_ENV !== 'production' ? devUrl : prodUrl;
 
 //微信授权后回调地址
-export const redirectUrl = "http://dev-ws.htyfw.com.cn:18003/auth";
+export const redirectUrl = "http://dev-ws.htyfw.com.cn:18301/auth";
 
 //当前所在公司的wxID
 // 神州浩天ID: wxa059996e5d72516b

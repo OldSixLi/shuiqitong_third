@@ -29,8 +29,6 @@
    return formatTime(time);
  }
 
-
-
  function add0(m) {
    return m < 10 ? '0' + m : m;
  }
