@@ -6,10 +6,9 @@
  * @Last Modified time:2018年10月8日14:00:22
  */
 /* jshint esversion: 6 */
+
 "use strict"
-
 import Empty from "@/page/Empty.vue";
-
 
 export default [{
   path: "/quan",
@@ -22,7 +21,12 @@ export default [{
     funPoint: "quan",
     requireAuth: true
   },
-  children: [{
+  children: [
+    /**
+     * 问卷列表
+     * @returns 
+     */
+  {
     path: "/quan/list",
     name: "问卷列表",
     component: Empty,
@@ -36,7 +40,7 @@ export default [{
         component: () =>
           import("@/page/quan/list.vue"),
         meta: {
-         
+
           funPoint: "quan-list1"
         }
       },
@@ -60,7 +64,7 @@ export default [{
           funPoint: "quan-add"
         },
       },
-     
+
       {
         path: "/quan/list/ansDetail/:qnaId/:userId",
         // name: "调查结果",
@@ -72,7 +76,12 @@ export default [{
         },
       }
     ]
-  },{
+  }, 
+  /**
+   * 结果统计 
+   * @returns 
+   */
+  {
     path: "/quan/statistics",
     name: "结果统计",
     component: Empty,
@@ -80,27 +89,24 @@ export default [{
       title: "结果统计",
       funPoint: "quan-statistics-list"
     },
-    children:[
-      {
+    children: [{
         path: "/",
         name: "结果统计",
-        component: () =>import("@/page/quan/statisticsList.vue"),
+        component: () => import("@/page/quan/statisticsList.vue"),
         meta: {
           // title: "问卷列表",
           funPoint: "quan-statistics-list1"
         },
-      }
-      ,
+      },
       {
         path: "/quan/statistics/:qnaId",
         // name: "答案统计",
-        component: () =>import("@/page/quan/ansData.vue"),
+        component: () => import("@/page/quan/ansData.vue"),
         meta: {
           title: "答案统计",
           funPoint: "quan-statistics-item"
         },
-      }
-      ,
+      },
       {
         path: "/quan/statistics/ansList/:qnaId",
         // name: "调查结果",
@@ -113,4 +119,4 @@ export default [{
       },
     ]
   }]
-}, ]
+}]

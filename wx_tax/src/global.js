@@ -27,8 +27,10 @@ import {
   Badge,
   Checklist,
   Picker,
-  Indicator
+  Indicator,
+  Switch 
 } from 'mint-ui';
+
 Vue.component(Picker.name, Picker);
 Vue.component(Button.name, Button);
 Vue.component(Popup.name, Popup);
@@ -45,6 +47,7 @@ Vue.component(TabContainer.name, TabContainer);
 Vue.component(TabContainerItem.name, TabContainerItem);
 Vue.component(Spinner.name, Spinner);
 Vue.component(Badge.name, Badge);
+Vue.component(Switch.name, Switch);
 Vue.component(Checklist.name, Checklist);
 Vue.use(InfiniteScroll);
 Vue.use(Indicator);

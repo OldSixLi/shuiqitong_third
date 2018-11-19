@@ -31,9 +31,7 @@
       next(vm => {
         vm.detailId = to.params.id;
         vm.isRead = to.query && to.query.isRead == "1";
-        vm.obj = {
-          
-        }
+        vm.obj = {};
         vm.getDetail(vm.detailId);
       });
     },

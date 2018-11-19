@@ -11,9 +11,7 @@
   </div>
 </template>
 <script>
-  import {
-    mapGetters
-  } from 'vuex';
+  import { mapGetters } from 'vuex';
   export default {
     name: "Child",
     props: {
@@ -25,7 +23,6 @@
         'wxComTree',
         'checkValue'
       ]),
-
     },
     data: function () {
       //组件内数据部分

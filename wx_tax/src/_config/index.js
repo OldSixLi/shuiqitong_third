@@ -19,13 +19,12 @@
 ........:::........:::::...:::::
 开发环境
 */
-// // token信息
-// export const token = "37149e9f5d4345a8bfda093011404d94";
-// //企业微信中UserID
-// export const wxUserId = "";
-// //企业微信中公司ID
-// export const wxComId = "wxa059996e5d72516b";
-
+// token信息
+export const token = "tax_125274d601ac46e3b8245b915bbfdab3";
+//企业微信中UserID
+export const wxUserId = "";
+//企业微信中公司ID
+export const wxComId = "wxa059996e5d72516b";
 
 /*
 '########::'########:::'#######::'########::
@@ -39,17 +38,17 @@
 正式环境
 */
 // token信息
-export const token = "";
-//企业微信中UserID
-export const wxUserId = "";
-//企业微信中公司ID
-export const wxComId = "";
+// export const token = "";
+// //企业微信中UserID
+// export const wxUserId = "";
+// //企业微信中公司ID
+// export const wxComId = "";
 
 /**
  * 接口地址 
  * @returns 
  */
-const devUrl = `http://192.168.106.13:8080/`; //开发环境
+const devUrl = `http://192.168.106.12:8080/`; //开发环境
 const prodUrl = `http://dev-ws.htyfw.com.cn:18300/`; //正式环境
 //根据生产环境区分服务器地址
 export const BASE_URL = process.env.NODE_ENV !== 'production' ? devUrl : prodUrl;

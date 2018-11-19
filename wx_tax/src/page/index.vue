@@ -1,41 +1,43 @@
 <template>
   <div class="index-block">
-    <div style="margin-top: 5rem;width:100%;">
-        <h2 class="text-center" style="margin-top:0;font-size: 5rem;color:#fff;">税企通</h2>
-        <h3 class="text-right" style="    box-sizing: border-box;margin-top: -2rem;padding:0 4rem;width:100%;color:#fff;">税务局版</h3>
+    <div style="margin-top: 2rem;width:100%;">
+      <h2 class="text-center" style="margin-top:0;font-size: 5rem;color:#fff;">税企通</h2>
+      <h3 class="text-right" style="    box-sizing: border-box;margin-top: -2rem;padding:0 4rem;width:100%;color:#fff;">税务局版</h3>
 
     </div>
-    
+
     <router-view name="path"></router-view>
     <!-- <mt-button @click="clearStroage">清除缓存</mt-button> -->
     <div class="box">
       <div class="column">
-        <span class="item" @click="toRole">
+        <span class="item" @click="toSys">
           <img src="./../assets/img/index-icon/system-icon.png">
           <span class="icon-title">系统设置</span>
         </span>
         <span class="item" @click="toAsk">
-            <img src="./../assets/img/index-icon/ask-icon.png">
-            <span>问题咨询</span>
-          </span>
-        
+          <img src="./../assets/img/index-icon/ask-icon.png">
+          <span>问题咨询</span>
+        </span>
+
       </div>
       <div class="column">
-          <span class="item" @click="toMessage">
-              <img src="./../assets/img/index-icon/msg-icon.png">
-              <span>消息通知</span>
-            </span>
-          <span class="item" @click="toQuanList">
-              <img src="./../assets/img/index-icon/quan-icon.png">
-              <span>问卷调查</span>
-            </span>
-        
+        <span class="item" @click="toMessage">
+          <img src="./../assets/img/index-icon/msg-icon.png">
+          <span>消息通知</span>
+        </span>
+        <span class="item" @click="toQuanList">
+          <img src="./../assets/img/index-icon/quan-icon.png">
+          <span>问卷调查</span>
+        </span>
+
       </div>
     </div>
   </div>
 </template>
 <script>
-  import { mapGetters } from 'vuex';
+  import {
+    mapGetters
+  } from 'vuex';
   import {
     Toast,
     Indicator,
@@ -54,7 +56,7 @@
       ])
     },
     methods: {
-      
+
       clearStroage() {
         let storage = window.localStorage;
         storage.setItem('currenComId', '');
@@ -77,21 +79,21 @@
        * 系统设置 
        * @returns 
        */
-      toRole() {
-        this.$to("/system/role");
+      toSys() {
+        this.$to("/system/user");
       },
       /**
        * 问答列表 
        * @returns 
        */
-      toAsk(){
+      toAsk() {
         this.$to("/ask/list");
-      }, 
+      },
       /**
        * 问卷列表 
        * @returns 
        */
-      toQuanList(){
+      toQuanList() {
         this.$to("/quan/list");
       },
       /**
@@ -109,9 +111,10 @@
       next();
     },
     mounted() {
-      Indicator.close(); 
+      Indicator.close();
     }
   }
+
 </script>
 <style scoped>
   /* 例子: http://www.ruanyifeng.com/blog/2015/07/flex-examples.html 
@@ -123,8 +126,8 @@
     align-items: center;
     flex-direction: column;
     justify-content: space-between;
-    padding: 0 2rem;
-    padding-bottom: 10rem;
+    padding: 5% 2rem;
+    padding-bottom: 20%;
     background-color: #6a8db7;
     max-width: 720px;
     margin: 0 auto;
@@ -155,6 +158,25 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+    background: #fff;
+  }
+
+  /* 针对四个模块的border-radius */
+  /* 左上 */
+  .column:first-child>.item:first-child {
+    border-top-left-radius: 1rem;
+  }
+  /* 右上 */
+  .column:first-child>.item:last-child {
+    border-top-right-radius: 1rem;
+  }
+  /* 左下 */
+  .column:last-child>.item:first-child {
+    border-bottom-left-radius: 1rem;
+  }
+  /* 右下 */
+  .column:last-child>.item:last-child {
+    border-bottom-right-radius: 1rem;
   }
 
   .column>.item img {
@@ -174,4 +196,5 @@
   .box>.column:nth-child(2)>.item {
     border-bottom: none;
   }
+
 </style>

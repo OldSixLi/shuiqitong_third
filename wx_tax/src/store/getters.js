@@ -19,6 +19,6 @@ const getters = {
   comUserId: state => state.comUserId,
   checkState: state => state.checkState,
   token: state => state.token,
-  failReason:state => state.failReason,
+  failReason: state => state.failReason,
 };
 export default getters;

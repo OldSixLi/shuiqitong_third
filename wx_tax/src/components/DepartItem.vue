@@ -18,7 +18,6 @@
         <d-item v-for="(y,$index) in x.children" :x="y" :activeArr="activeArr" :key="$index"></d-item>
       </ul>
     </template>
-    
   </div>
 </template>
 <script>

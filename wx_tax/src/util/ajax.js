@@ -143,14 +143,14 @@ function errorHandler(ajaxData) {
     }
     // -2 企业信息不存在、已被作废
     // -3 企业未提交审核  
-    // -4 企业审核未通过     
-    // -5企业审核中
     else if (msgState == "-3" || msgState == "-2") {
       Vue.prototype.$to("/infoChecking/4");
     }
+    // -4 企业审核未通过     
     else if (msgState == "-4") {
       Vue.prototype.$to("/infoChecking/2");
     }
+    // -5企业审核中
     else if (msgState == "-5") {
       Vue.prototype.$to("/infoChecking/3");
     }

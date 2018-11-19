@@ -59,7 +59,7 @@
       },
 
       getComInfo(redirectUrl) {
-        this.$post(`/audit/getEntepriseInfo`, {
+        this.$post(`/audit/getTaxInfo`, {
           corpId: this.companyId
         }).then((data) => {
           // 0-审核中 1-审核通过 2-审核未通过 3-重新提交审核，审核中 4-未提交审核

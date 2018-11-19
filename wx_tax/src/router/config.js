@@ -105,7 +105,7 @@ function userAuthCheck(roles, to, next, routers) {
  */
 function getRoleAndRight() {
   return new Promise(function (resolve, _reject) {
-    Vue.prototype.$get(`/ent/login/getRoleAndRight`).then(data => {
+    Vue.prototype.$get(`/tax/login/getRoleAndRight`).then(data => {
       if (data.success) {
         store.commit(`changeRole`, data.bean.roles);
         store.dispatch(`getAppMenu`, data.bean.right);

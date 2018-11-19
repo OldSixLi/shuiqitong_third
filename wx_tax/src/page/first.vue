@@ -38,7 +38,7 @@
     },
     methods: {
       toSetAuth() {
-        window.location.href = wxAuthUrl + `&state=STATE#${to.query.path}`;
+        window.location.href = wxAuthUrl + `&state=${to.query.path}`;
       }
     },
     created() {
@@ -53,8 +53,7 @@
             console.log("■■■■■■■■■■■■to.query.path■■■■■■■■■■■■■");
             console.log(to.query.path);
             console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
-            window.location.href = wxAuthUrl + `&state=STATE#${to.query.path}`;
-
+            window.location.href = wxAuthUrl + `&state=${to.query.path}`;
           } else {
             window.location.href = wxAuthUrl;
           }

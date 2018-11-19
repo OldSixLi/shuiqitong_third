@@ -103,7 +103,7 @@
        * @returns 
        */
       getComInfo(corpId) {
-        this.$get(`/audit/getEntepriseInfo?corpId=${corpId}`)
+        this.$get(`/audit/getTaxInfo?corpId=${corpId}`)
           .then(data => {
             if (data.success) {
               this.username=data.bean.entInfo.entName;
