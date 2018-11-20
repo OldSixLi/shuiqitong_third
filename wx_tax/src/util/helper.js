@@ -6,6 +6,7 @@
   * @returns
   */
  export function formatTime(date) {
+   
    const year = date.getFullYear();
    const month = date.getMonth() + 1;
    const day = date.getDate();
@@ -25,6 +26,9 @@
   * @returns 正常时间
   */
  export function toNormalTime(shijianchuo) {
+   if(!shijianchuo){
+  return '-';
+}
    var time = new Date(parseInt(shijianchuo));
    return formatTime(time);
  }

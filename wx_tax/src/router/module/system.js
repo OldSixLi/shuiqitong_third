@@ -21,23 +21,22 @@ export default [{
     requireAuth: true
   },
   children: [{
-    path: "/system/role",
-    name: "用户列表",
-    component: () => import("@/page/system/role.vue"),
+    path: "/system/userInfo/:userId",
+    name: "用户详情",
+    component: () => import("@/page/system/userInfo.vue"),
     meta: {
-      title: "用户列表",
-      funPoint: "system-role"
+      title: "用户详情",
     },
   },
   {
     path: "/system/user",
     name: "用户列表",
-    component: () =>
-      import("@/page/system/user.vue"),
+    component: () => import("@/page/system/user.vue"),
     meta: {
       title: "用户列表",
       funPoint: "system-user"
-    },children:[
+    }
+    ,children:[
       {
         path:"/system/user/depart/:departId",
         component: () =>import("@/page/system/depart.vue"),

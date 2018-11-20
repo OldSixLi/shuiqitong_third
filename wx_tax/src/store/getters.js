@@ -8,7 +8,7 @@
 /* jshint esversion: 6 */
 "use strict"
 const getters = {
-  departmentId: state => state.departmentId,
+  currentUserInfo: state => state.currentUserInfo,
   checkValue: state => state.checkValue,
   companyTree: state => state.companyTree,
   wxComTree: state => state.wxComTree,

@@ -34,7 +34,8 @@
       <transition name="searchBlock">
         <div class="search-block" v-show="isSearch">
           <div>
-            <mt-field label="姓名" placeholder="请输入姓名" v-model.trim="userName"></mt-field>
+
+            <mt-field label="姓　名" placeholder="请输入姓名" v-model.trim="userName"></mt-field>
             <mt-field label="手机号" placeholder="请输入手机号" v-model.trim="phoneNum" type="number"></mt-field>
           </div>
           <p class="text-right search-btns" style="padding:0 1rem;">
@@ -43,8 +44,6 @@
           </p>
         </div>
       </transition>
-      <!-- {{list.length}} -->
-      <!-- {{list}} -->
       <!--
       '##:::::::'####::'######::'########:
        ##:::::::. ##::'##... ##:... ##..::
@@ -59,25 +58,27 @@
         <div class="index-num" style="width:1.5rem;">
           {{indexMethod($index)}}
         </div>
-        <div class="user-icon">
-          <!-- 用户头像 -->
-          <img :src="x.AVATAR|toSmallImg" alt="">
-          </div>
+        <!-- 用户头像 -->
+        <div class="user-icon"><img :src="x.AVATAR|toSmallImg"></div>
+          <!-- 用户信息 -->
           <div class="user-info">
-            <!-- 用户信息 -->
             <p class="name">
               <span class="span-name"> {{x.NAME}} </span>
               <span class="gender-icon">
                 <img :src="require('@/assets/img/icon/man-icon.png')"  v-if="x.GENDER==1">
                 <img :src="require('@/assets/img/icon/woman-icon.png')" v-if="x.GENDER!=1">
-              </span>
+            </span>
             </p>
             <p class="time"> <span class="span-time"> 登陆时间：{{x.LAST_TIME|toTime}} </span> </p>
           </div>
+          <!-- 详情按钮 -->
+          <div class="detail-icon" @click="toUserInfo(x)">
+            <img :src="require('@/assets/img/icon/detail-icon.png')" alt="">
         </div>
-      </div>
+          </div>
+        </div>
 
-      <!--
+        <!--
       '########:::::'###:::::'######:::'########:
        ##.... ##:::'## ##:::'##... ##:: ##.....::
        ##:::: ##::'##:. ##:: ##:::..::: ##:::::::
@@ -87,30 +88,31 @@
        ##:::::::: ##:::: ##:. ######::: ########:
       ..:::::::::..:::::..:::......::::........::
       -->
-      <div class="bottom-page">
-        <p class="text-center btns">
-          <!-- 首页 -->
-          <mt-button size="small" type="primary" @click="pageFirst" :disabled="currentPage==1">首页</mt-button>
-          <!-- 上一页 -->
-          <mt-button size="small" type="primary" @click="pagePrev" :disabled="currentPage==1">上一页</mt-button>
-          <!-- 页码 -->
-          <mt-button size="small" @click="pageIndexClick"><span>{{currentPage}} / {{totalPage}}</span></mt-button>
-          <!-- 下一页 -->
-          <mt-button size="small" type="primary" @click="pageNext" :disabled="currentPage==totalPage">下一页</mt-button>
-          <!-- 尾页 -->
-          <mt-button size="small" type="primary" @click="pageLast" :disabled="currentPage==totalPage">尾页</mt-button>
-        </p>
-        <!-- 底部分页区域 -->
-        <mt-popup v-model="isShowList" position="bottom" class="mint-popup-4">
-          <p class="page-change-area">
-            <mt-button type="default" size="small" @click="btnCancelPage">取消</mt-button>
-            <mt-button type="primary" size="small" @click="btnChangePage">确定</mt-button>
+        <div class="bottom-page">
+          <p class="text-center btns">
+            <!-- 首页 -->
+            <mt-button size="small" type="primary" @click="pageFirst" :disabled="currentPage==1">首页</mt-button>
+            <!-- 上一页 -->
+            <mt-button size="small" type="primary" @click="pagePrev" :disabled="currentPage==1">上一页</mt-button>
+            <!-- 页码 -->
+            <mt-button size="small" @click="pageIndexClick"><span>{{currentPage}} / {{totalPage}}</span></mt-button>
+            <!-- 下一页 -->
+            <mt-button size="small" type="primary" @click="pageNext" :disabled="currentPage==totalPage">下一页</mt-button>
+            <!-- 尾页 -->
+            <mt-button size="small" type="primary" @click="pageLast" :disabled="currentPage==totalPage">尾页</mt-button>
           </p>
-          <!-- 分页 -->
-          <mt-picker :slots="numberSlot" @change="onDateChange" :visible-item-count="5" :show-toolbar="false" value-key="page"></mt-picker>
-        </mt-popup>
+          <!-- 底部分页区域 -->
+          <mt-popup v-model="isShowList" position="bottom" class="mint-popup-4">
+            <p class="page-change-area">
+              <mt-button type="default" size="small" @click="btnCancelPage">取消</mt-button>
+              <mt-button type="primary" size="small" @click="btnChangePage">确定</mt-button>
+            </p>
+            <!-- 分页 -->
+            <mt-picker :slots="numberSlot" @change="onDateChange" :visible-item-count="5" :show-toolbar="false"
+              value-key="page"></mt-picker>
+          </mt-popup>
+        </div>
       </div>
-    </div>
 </template>
 <script>
   // import { mapGetters } from 'vuex';
@@ -145,6 +147,16 @@
     //  ##:::: ##: ########:::: ##:::: ##:::: ##:. #######:: ########::. ######::
     // ..:::::..::........:::::..:::::..:::::..:::.......:::........::::......:::
     methods: {
+      /**
+       * 获取用户详情 
+       * @returns 
+       */
+      toUserInfo(info) {
+        let userId = info.ID;
+        //加入全局变量
+        this.$store.commit('setCurrentUser',info);
+        this.$to(`/system/userInfo/${userId}`);
+      },
 
       /**
        * 搜索按钮点击事件 
@@ -157,7 +169,7 @@
           // this.tip("请输入手机号后再进行操作", "error");
           // return false;
           if (!this.checkPhone(phone)) {
-            this.tip("请输入正确的手机号", "error");
+            this.$tip("请输入正确的手机号", "error");
             return false;
           }
         }
@@ -249,11 +261,7 @@
             } else {
               // this.$message.error(data.message || `操作失败,请重试！`); 
             }
-          }).catch(() => {
-            // this.$message.error("请求服务失败,请重试！"); 
-          }).finally(() => {
-            //TODO 此处需要重置某些ajax loading状态
-          });
+          }).catch((err) => {console.log(err);});
       },
       // '########:::::'###:::::'######:::'########:
       //  ##.... ##:::'## ##:::'##... ##:: ##.....::
@@ -309,7 +317,7 @@
       }
     },
     mounted() {
-      // this.getTable();
+      this.getTable();
     },
     watch: {
       currentPage(newValue, oldValue) {
@@ -396,12 +404,26 @@
     align-items: center;
   }
 
+  .detail-icon {
+    height: 100%;
+    align-self: flex-end;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .detail-icon img {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
   /* 底部分页区域 */
 
   .bottom-page {
-   
+
     border-top: 1px solid #ddd;
-    box-shadow: -1px 1px 4px 2px rgba(5,5,5,0.1);
+    box-shadow: -1px 1px 4px 2px rgba(5, 5, 5, 0.1);
     height: 5rem;
     position: fixed;
     bottom: 0;

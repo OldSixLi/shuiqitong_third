@@ -124,3 +124,7 @@ body {
 .ask-time {
   font-size: 1.2rem;
 }
+/* 一般用于P标签默认margin过大 */
+.small-margin{
+  margin:0.5rem 0;
+}

@@ -34,10 +34,24 @@ const store = new Vuex.Store({
     companyId: storage.getItem('currenComId') || wxComId || "", //微信公司ID 
     comUserId: storage.getItem('comUserId') || wxUserId || "", //员工在此公司微信的ID 
     companyTree: [], //公司部门架构 (树形数据)
-    wxComTree: [], //微信返回的公司部门架构  (扁平数据)
+    wxComTree: [], //微信返回的公司部门架构  (扁平数据),
+    /*
+    '##::: ##:'########:'##:::::'##:
+     ###:: ##: ##.....:: ##:'##: ##:
+     ####: ##: ##::::::: ##: ##: ##:
+     ## ## ##: ######::: ##: ##: ##:
+     ##. ####: ##...:::: ##: ##: ##:
+     ##:. ###: ##::::::: ##: ##: ##:
+     ##::. ##: ########:. ###. ###::
+    ..::::..::........:::...::...:::
+    */
+   currentUserInfo:{}
   },
   getters,
   mutations: {
+    setCurrentUser(state, user){
+      state.currentUserInfo=user;
+    },
     /**
      * 修改token 
      */
