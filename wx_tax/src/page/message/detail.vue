@@ -20,7 +20,6 @@
       return {
         detailId: "",
         obj: {},
-        userId: "1",
         isRead: false
       }
     },

@@ -15,9 +15,9 @@
             <!--  未读 -->
             <img class="msg-img " v-if="!x.userId" src="@/assets/img/unread.png">
             <!-- 消息标题 -->
-            <p class="title">{{x.title}}</p>
+            <p class="title">{{x.TITLE}}</p>
             <!-- 消息时间 -->
-            <p class="time"><img src="@/assets/img/time.png"><span>{{x.createTime | toStamp | toTime}}</span></p>
+            <p class="time"><img src="@/assets/img/time.png"><span>{{x.CREATE_TIME|toTime}}</span></p>
           </div>
           <!-- 总数为空 -->
           <div class="text-center" style="margin-top:5rem;" v-if="msgList.length==0&&totalPage==0&&currentPage==0">
@@ -68,8 +68,7 @@
         this.$get(
           `/message/list`, {
             currentPage,
-            comId: this.comId,
-            userId: "1"
+            comId: this.comId
           }).then(data => {
             if (data.success) {
               this.currentPage = data.bean.pageNum;

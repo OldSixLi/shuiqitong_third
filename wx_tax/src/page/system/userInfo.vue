@@ -120,9 +120,6 @@ roleNames: "管理员,普通用户" -->
             })
           .then(data => {
             if (data.success) {
-              console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
-              console.log(data.bean);
-              console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
               let idArr = [],nameArr=[];
               data.bean.forEach(x => {
                 idArr.push(x.roleId);
@@ -136,9 +133,7 @@ roleNames: "管理员,普通用户" -->
               this.$tip(data.bean.message || `操作失败,请重试！`);
             }
           }).catch((err) => {
-            console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
             console.log(err);
-            console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
             this.$tip("请求服务失败,请重试！");
           });
       },

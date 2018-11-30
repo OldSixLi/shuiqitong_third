@@ -12,7 +12,7 @@
     </mt-navbar>
     <mt-tab-container v-model="currentPanel">
       <mt-tab-container-item id="1">
-        <div v-infinite-scroll="loadMore1" infinite-scroll-disabled="loading1" infinite-scroll-distance="40" class="white">
+        <div infinite-scroll-disabled="loading1" infinite-scroll-distance="40" class="white">
           <div class="ask-li msg-child" v-if="askList1.length>0" v-for="(x,$index)  in askList1" @click="toDetail(x.id||'1')">
             <p class="title"> {{x.queTitle}}</p>
             <!-- 消息时间 -->
@@ -21,17 +21,18 @@
           <div v-if="askList1.length==0&&currentPage1==0&&totalPage1==0" class="nomore-data">
             暂无数据
           </div>
-
           <p v-show="(loading1&&currentPage1<totalPage1)" class="page-infinite-loading">
             <mt-spinner type="fading-circle"></mt-spinner>
             加载中...
           </p>
           <div v-show="currentPage1==totalPage1&&currentPage1>0" class="nomore-data">无更多内容</div>
+          <!-- 分页插件 -->
+          <page :page-param="pageParam1" @pageChange="pageChange1"></page>
         </div>
       </mt-tab-container-item>
       <mt-tab-container-item id="2">
-        <div v-infinite-scroll="loadMore0" infinite-scroll-disabled="loading0" infinite-scroll-distance="40"
-          infinite-scroll-immediate-check="false" class="white">
+        <div infinite-scroll-disabled="loading0" infinite-scroll-distance="40" infinite-scroll-immediate-check="false"
+          class="white">
           <div class="ask-li msg-child" v-if="askList0.length>0" v-for="(x,$index)  in askList0" @click="toDetail(x.id||'1')">
             <p class="title"> {{x.queTitle}}</p>
             <!-- 消息时间 -->
@@ -54,12 +55,26 @@
   import {
     Toast
   } from 'mint-ui';
+  import Page from '@/components/page.vue';
   export default {
     name: "AskList",
     props: {},
+    components: {
+      Page
+    },
     data: function () {
       //组件内数据部分
       return {
+        pageParam1: {
+          currentPage: 1, //列表的当前页
+          totalPage: 1, //列表的总页数,
+          totalNum: 0, //总记录条数
+        },
+        pageParam0: {
+          currentPage: 1, //列表的当前页
+          totalPage: 1, //列表的总页数,
+          totalNum: 0, //总记录条数
+        },
         currentPanel: "1",
         // 已回答
         currentPage1: 1,
@@ -81,6 +96,14 @@
 
     },
     methods: {
+      /**
+       * 页码变化的事件 
+       * @returns 
+       */
+      pageChange1(currentPage) {
+        this.currentPage1 = currentPage;
+        this.getQuestionList("1", currentPage);
+      },
       addQuestion() {
         this.$to("/ask/add");
       },
@@ -93,25 +116,17 @@
       getQuestionList(state, currentPage = 1) {
         this[`loading${state}`] = true;
         this
-          .$get(`/queres/list`, {
+          .$get(`/tax/queres/queList`, {
             currentPage,
-            state,
-            userId: "1"
+            state
           })
           .then(
             data => {
               if (data.success) {
                 this[`askList${state}`] = this[`askList${state}`].concat(data.bean.data);
-                this[`currentPage${state}`] = data.bean.pageNum;
-                this[`totalPage${state}`] = data.bean.pageCount;
-
-                if (this[`currentPage${state}`] > this[`totalPage${state}`]) {
-                  this[`currentPage${state}`] = this[`totalPage${state}`];
-                }
-                if (data.bean && data.bean.data && data.bean.data.length > 0) {
-                  this[`loading${state}`] = ((this[`currentPage${state}`] >= this[
-                    `totalPage${state}`]));
-                }
+                this[`pageParam${state}`].currentPage = data.bean.pageNum;
+                this[`pageParam${state}`].totalPage = data.bean.pageCount;
+                this[`pageParam${state}`].totalNum = data.bean.rowCount;
               } else {
                 this[`currentPage${state}`] = this[`totalPage${state}`] = 0;
                 this.$tip("请求服务失败，请稍后重试!");
@@ -150,13 +165,12 @@
         vm.getQuestionList("0");
         vm.getQuestionList("1");
 
-        if(to.query&&to.query.panel=='2'){
-          vm.currentPanel='2';
+        if (to.query && to.query.panel == '2') {
+          vm.currentPanel = '2';
         }
       })
     }
   }
-
 </script>
 <style scoped>
   .container {
@@ -220,7 +234,6 @@
     top: -0.2rem;
     color: #8b8b8b;
   }
-
 </style>
 <style>
   .mint-tab-item .mint-tab-item-label {
@@ -230,5 +243,4 @@
   .ask-li {
     line-height: 50px;
   }
-
 </style>

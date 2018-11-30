@@ -51,8 +51,7 @@
           corpId: "1", // TODO 正式环境需要配置
           departmentId: "1", // TODO 正式环境需要配置
           question: this.question,
-          queTitle: this.title,
-          userId: "1" // TODO 正式环境需要配置
+          queTitle: this.title
         }).then(
           data => {
             if (data.success) {

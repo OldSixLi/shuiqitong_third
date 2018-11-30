@@ -3,7 +3,7 @@
     <el-row style="margin-top: 10px;">
       <el-col :span="12" :offset="6">
         <!-- <h1 class="text-center">信息获取中</h1> -->
-        <h1>{{code}}</h1>
+        <!-- <h1>{{code}}</h1> -->
       </el-col>
     </el-row>
   </div>
@@ -119,19 +119,15 @@
       let obj = this.urlSearch();
       // alert(obj.auth_code )
       this.code = obj.auth_code || "";
-      // if (this.code && !this.$store.state.isLogin) {
-      //   this.getInfo();
-      // }else if(!this.code){
-      //   window.location.href = wxUrl;
-      // }else if(this.$store.state.isLogin){
-      //   this.$to("/")
-      // }else{
-      //   window.location.href = wxUrl;
-      // }
-     
-    },
-    created() {
-
+      if (this.code && !this.$store.state.isLogin) {
+        this.getInfo();
+      }else if(!this.code){
+        window.location.href = wxUrl;
+      }else if(this.$store.state.isLogin){
+        this.$to("/")
+      }else{
+        window.location.href = wxUrl;
+      }
     },
     beforeRouteLeave(to, from, next) {
       loader.close();

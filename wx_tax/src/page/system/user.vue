@@ -40,7 +40,7 @@
           </div>
           <p class="text-right search-btns" style="padding:0 1rem;">
             <mt-button size="small" type="primary" @click="searchBtnClick">搜索</mt-button>
-            <mt-button size="small" @click="isSearch=false">取消</mt-button>
+            <mt-button size="small" @click="cancelSearch">取消</mt-button>
           </p>
         </div>
       </transition>
@@ -54,7 +54,7 @@
        ########:'####:. ######::::: ##::::
       ........::....:::......::::::..:::::
       -->
-      <div v-for="(x,$index) in list" class="single-user">
+      <div v-for="(x,$index) in list" class="single-user" v-show="list.length>0">
         <div class="index-num" style="width:1.5rem;">
           {{indexMethod($index)}}
         </div>
@@ -76,6 +76,11 @@
             <img :src="require('@/assets/img/icon/detail-icon.png')" alt="">
         </div>
           </div>
+
+          <div v-show="list.length==0" class="text-center">
+            <img :src="require('@/assets/img/no-result.png')" alt="">
+            <h4 style="color:#696464;margin:0;">未搜索到结果</h4>
+          </div>
         </div>
 
         <!--
@@ -88,7 +93,7 @@
        ##:::::::: ##:::: ##:. ######::: ########:
       ..:::::::::..:::::..:::......::::........::
       -->
-        <div class="bottom-page">
+        <div class="bottom-page" v-show="totalNum>0">
           <p class="text-center btns">
             <!-- 首页 -->
             <mt-button size="small" type="primary" @click="pageFirst" :disabled="currentPage==1">首页</mt-button>
@@ -127,7 +132,7 @@
         currentPage: 1, //列表的当前页
         totalPage: 1, //列表的总页数,
         totalNum: 0, //总记录条数
-        showCount: 10, //TODO 后期修改为10
+        showCount: 1, //TODO 后期修改为10
         isShowList: false,
         currentChangePage: 1, //当前分页组件所选的分页值(未点击确定按钮时给此变量赋值)
         numberSlot: [{
@@ -135,7 +140,11 @@
           defaultIndex: 0,
           values: [], //在getTable方法中设置对象的形式
           className: 'slot1'
-        }]
+        }],
+        searchData: {
+          name: "",
+          phone: ""
+        }
       }
     },
     // '##::::'##:'########:'########:'##::::'##::'#######::'########:::'######::
@@ -148,13 +157,26 @@
     // ..:::::..::........:::::..:::::..:::::..:::.......:::........::::......:::
     methods: {
       /**
+       * 电话校验
+       * 
+       * @param {any} phone 手机号
+       * @returns 是否有效 T/F
+       */
+      checkPhone(phone) {
+        if (!(/^1(3|4|5|7|8)\d{9}$/.test(phone))) {
+          return false;
+        } else {
+          return true;
+        }
+      },
+      /**
        * 获取用户详情 
        * @returns 
        */
       toUserInfo(info) {
         let userId = info.ID;
         //加入全局变量
-        this.$store.commit('setCurrentUser',info);
+        this.$store.commit('setCurrentUser', info);
         this.$to(`/system/userInfo/${userId}`);
       },
 
@@ -173,9 +195,25 @@
             return false;
           }
         }
+        let userName = this.userName;
+        this.currentPage = 1;
+        this.searchData = {
+          name: userName,
+          phone
+        }
+
+        this.getTable();
       },
+      /**
+       * 取消搜索 
+       * @returns 
+       */
+      cancelSearch()
 
-
+      {
+        this.isSearch = false;
+        
+      },
       /**
        * 计算当前的列表index 
        * @returns 
@@ -211,7 +249,6 @@
         if (this.currentPage != this.currentChangePage) {
           this.currentPage = this.currentChangePage;
           this.getTable();
-
         }
       },
 
@@ -237,7 +274,9 @@
         this.$post(
             `/tax/userCenter/getTaxUserList`, {
               currentPage,
-              showCount
+              showCount,
+              userName: this.searchData.name,
+              phone: this.searchData.phone
             }
           )
           .then(data => {
@@ -248,7 +287,6 @@
               this.totalPage = data.bean.pageCount;
               this.currentPage = data.bean.pageNum;
               this.totalNum = data.bean.rowCount;
-              // numberSlot
               // 此处将页码塞进数组中用于展示所有页码
               let arr = [];
               for (let i = 0; i < this.totalPage; i++) {
@@ -261,7 +299,9 @@
             } else {
               // this.$message.error(data.message || `操作失败,请重试！`); 
             }
-          }).catch((err) => {console.log(err);});
+          }).catch((err) => {
+            console.log(err);
+          });
       },
       // '########:::::'###:::::'######:::'########:
       //  ##.... ##:::'## ##:::'##... ##:: ##.....::
@@ -322,6 +362,17 @@
     watch: {
       currentPage(newValue, oldValue) {
         this.numberSlot[0].defaultIndex = newValue - 1;
+      },
+      isSearch(newValue, oldValue){
+        if(!newValue){
+          this.userName = '';
+        this.phoneNum = '';
+        // this.searchData = {
+        //   name: "",
+        //   phone: ""
+        // };
+        this.getTable();
+        }
       }
     },
     beforeRouteEnter(to, from, next) {
@@ -336,7 +387,6 @@
       // ])
     },
   }
-
 </script>
 <style scoped>
   .span-right-search {
@@ -496,7 +546,6 @@
   .search-block .search-btns {
     padding: 1rem 0;
   }
-
 </style>
 <style>
   .is-right .mint-switch {
@@ -506,5 +555,4 @@
   .is-right .mint-switch-input:checked+.mint-switch-core {
     background-color: #653be6;
   }
-
 </style>

@@ -163,7 +163,7 @@
             let checkedRows = [];
             let arr = data.bean.data;
             let currentIds = [];
-            //收集当前的十个公司ID
+            //收集当前的几个公司ID
             arr.forEach(com => currentIds.push(com.ID));
             this.currentComs = currentIds;
             //table数据赋值
