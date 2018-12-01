@@ -11,59 +11,99 @@
       <div class="ask-detail title-span-block"><span>问题描述</span>
         <p> {{detailObj.QUESTION}} </p>
         <p class="text-left ask-time" style="margin-bottom: 0;" v-if="detailObj.QUE_TIME">
-          <img src="@/assets/img/time.png" class="time-icon">
-          <span v-show="detailObj.QUE_TIME">{{detailObj.QUE_TIME|toStamp|toTime}}</span>
+          <icon-word :src="require('@/assets/img/user.png')" :word="detailObj.QUE_USER_ID" />
+          <icon-word :src="require('@/assets/img/time.png')" :word="detailObj.QUE_TIME|toTime" />
         </p>
       </div>
 
-      <div class="ask-answer title-span-block"><span>答案详情</span>
-
+      <div class="ask-answer title-span-block">
+        <span v-if="detailObj.RESPONSE">答案详情</span>
         <p v-if="detailObj.RESPONSE">{{detailObj.RESPONSE}}</p>
-        <p v-if="!detailObj.RESPONSE" class="nomore-data">您的问题暂未被回复</p>
+
         <p class="text-left ask-time" v-if="detailObj.RESPONSE" style="margin-top: 1.2rem;margin-bottom: 0;">
-          <img src="@/assets/img/user.png" class="time-icon">
-          <span>{{detailObj.resName}}</span>
-          <img src="@/assets/img/time.png" class="time-icon" style="margin-left:2rem;">
-          <span> {{detailObj.RES_TIME|toStamp|toTime}}</span>
+
+          <icon-word :src="require('@/assets/img/user.png')" :word="detailObj.resName" />
+          <icon-word :src="require('@/assets/img/time.png')" :word="detailObj.RES_TIME|toTime" />
+
         </p>
+        <span v-if="!detailObj.RESPONSE">回复问题</span>
+        <!-- <p v-if="!detailObj.RESPONSE" class="nomore-data"> -->
+        <div style="height:100%;">
+          <textarea v-if="!detailObj.RESPONSE" v-model="response" placeholder="请在此输入问题的回复" style="" class="textarea-ans" row="10" col="10"></textarea>
+        </div>
+        <!-- </p> -->
       </div>
-      <mt-button size="small" type="primary" style="float:right;" @click="topBack">返回列表</mt-button>
+      <p class="text-right">
+        <mt-button size="small" type="default" @click="topBack">返回列表</mt-button>
+        <mt-button size="small" type="primary" @click="saveAns" v-if="!detailObj.RESPONSE">回复问题</mt-button>
+
+      </p>
     </div>
   </div>
 </template>
 <script>
+  import IconWord from '@/components/IconWord';
   export default {
     name: "askDetail",
+    components: {
+      "icon-word": IconWord
+    },
     props: {},
     data: function () {
       // 组件内数据部分
       return {
         currentId: "",
-        detailObj: {
-          // title: "今年的政策形势?",
-          // detail: "我们公司需要缴纳的税额",
-          // answer: "中小高新型企业全免",
-          // time: ""
-        }
+
+        response:"",
+        detailObj: {}
       }
     },
     beforeRouteEnter(to, from, next) {
       next(vm => {
+        vm.response="";
         vm.currentId = to.params.id;
+        vm.getDetail(vm.currentId);
       });
     },
     mounted: function () {
       //组件生成时调用
     },
     methods: {
+      saveAns() {
+        let qrId = this.detailObj.ID;
+        if (!qrId) {
+          return;
+        }
+        let response = this.response;
+        if (!response) {
+          this.$alert(`请输入问题回复后再进行保存!`);
+          return false;
+        }
+        this.$post(
+            `/tax/queres/saveAndSend`, {
+              response,
+              qrId
+            })
+          .then(data => {
+            if (data.success) {
+              this.$tip('回复问题成功!');
+              this.getDetail(this.currentId);
+            } else {
+              this.$tip(data.message || `操作失败,请重试！`);
+            }
+          }).catch(() => {
+            this.$tip("请求服务失败,请重试！");
+          });
+      },
+
       getDetail(qurResId) {
         this.$get(`/queres/detail`, {
           qurResId
         }).then(
           data => {
-            if(data.success){
+            if (data.success) {
               this.detailObj = data.bean;
-            }else{
+            } else {
               this.$alert(data.message).then(x => {
                 this.$to("/ask/list");
               })
@@ -76,7 +116,6 @@
       },
       backList() {
         this.$back();
-        // this.$router.back();
       }
     },
     watch: {
@@ -88,6 +127,23 @@
   }
 </script>
 <style scoped>
+  .textarea-ans {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: none;
+    padding: 0.5rem;
+    min-height: 6rem;
+    margin-top: 0.5rem;
+  }
+
+  .textarea-ans:focus {
+    border: 0.1rem solid #66afe9;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    outline: none;
+  }
+
   .page-content {
     padding: 1rem;
     padding-top: 4rem;
@@ -131,5 +187,4 @@
     color: #ab7f7f;
   }
 
-  /* .ask-answer {} */
 </style>

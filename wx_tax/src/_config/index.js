@@ -20,7 +20,7 @@
 开发环境
 */
 // token信息
-export const token = "tax_125274d601ac46e3b8245b915bbfdab3";
+export const token = "tax_f87cdd00289d4944ad213715312fa5d1";
 //企业微信中UserID
 export const wxUserId = "";
 //企业微信中公司ID

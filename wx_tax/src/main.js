@@ -1,6 +1,6 @@
 import VConsole from 'vconsole/dist/vconsole.min.js'
-import App from './App.vue';
-import router from './router';
+import App from '@/App.vue';
+import router from '@/router';
 import store from '@/store/index.js';
 
 import '@/router/config';

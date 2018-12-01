@@ -341,6 +341,7 @@ roleNames: "管理员,普通用户" -->
     height: 100%;
     background-color: #fff;
   }
+  
 
   .bottom-auth-btns {
     box-sizing: border-box;
@@ -356,7 +357,6 @@ roleNames: "管理员,普通用户" -->
     display: flex;
     justify-content: space-between;
     align-items: center;
-
   }
 
   .bottom-auth-btns .mint-button {

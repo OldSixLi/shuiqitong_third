@@ -34,7 +34,6 @@
       <transition name="searchBlock">
         <div class="search-block" v-show="isSearch">
           <div>
-
             <mt-field label="姓　名" placeholder="请输入姓名" v-model.trim="userName"></mt-field>
             <mt-field label="手机号" placeholder="请输入手机号" v-model.trim="phoneNum" type="number"></mt-field>
           </div>
@@ -78,7 +77,7 @@
           </div>
 
           <div v-show="list.length==0" class="text-center">
-            <img :src="require('@/assets/img/no-result.png')" alt="">
+            <img :src="require('@/assets/img/no-result.png')">
             <h4 style="color:#696464;margin:0;">未搜索到结果</h4>
           </div>
         </div>
@@ -132,7 +131,7 @@
         currentPage: 1, //列表的当前页
         totalPage: 1, //列表的总页数,
         totalNum: 0, //总记录条数
-        showCount: 1, //TODO 后期修改为10
+        showCount: 10, //TODO 后期修改为10
         isShowList: false,
         currentChangePage: 1, //当前分页组件所选的分页值(未点击确定按钮时给此变量赋值)
         numberSlot: [{
@@ -188,31 +187,25 @@
         let phone = this.phoneNum;
         // 手机号校验
         if (phone) {
-          // this.tip("请输入手机号后再进行操作", "error");
-          // return false;
           if (!this.checkPhone(phone)) {
             this.$tip("请输入正确的手机号", "error");
             return false;
           }
         }
-        let userName = this.userName;
+        let name = this.userName;
         this.currentPage = 1;
         this.searchData = {
-          name: userName,
+          name,
           phone
         }
-
         this.getTable();
       },
       /**
        * 取消搜索 
        * @returns 
        */
-      cancelSearch()
-
-      {
+      cancelSearch() {
         this.isSearch = false;
-        
       },
       /**
        * 计算当前的列表index 
@@ -272,36 +265,34 @@
       //页面中用到的方法
       getTable(currentPage = this.currentPage, showCount = this.showCount) {
         this.$post(
-            `/tax/userCenter/getTaxUserList`, {
-              currentPage,
-              showCount,
-              userName: this.searchData.name,
-              phone: this.searchData.phone
+          `/tax/userCenter/getTaxUserList`, {
+            currentPage,
+            showCount,
+            userName: this.searchData.name,
+            phone: this.searchData.phone
+          }
+        ).then(data => {
+          if (data.success) {
+            console.log(data);
+            this.list = data.bean.data;
+            this.totalPage = data.bean.pageCount;
+            this.currentPage = data.bean.pageNum;
+            this.totalNum = data.bean.rowCount;
+            // 此处将页码塞进数组中用于展示所有页码
+            let arr = [];
+            for (let i = 0; i < this.totalPage; i++) {
+              arr.push({
+                value: i + 1,
+                page: `第${i + 1}页`
+              })
             }
-          )
-          .then(data => {
-            if (data.success) {
-              //TODO 操作成功进行的操作
-              console.log(data);
-              this.list = data.bean.data;
-              this.totalPage = data.bean.pageCount;
-              this.currentPage = data.bean.pageNum;
-              this.totalNum = data.bean.rowCount;
-              // 此处将页码塞进数组中用于展示所有页码
-              let arr = [];
-              for (let i = 0; i < this.totalPage; i++) {
-                arr.push({
-                  value: i + 1,
-                  page: `第${i + 1}页`
-                })
-              }
-              this.numberSlot[0].values = arr;
-            } else {
-              // this.$message.error(data.message || `操作失败,请重试！`); 
-            }
-          }).catch((err) => {
-            console.log(err);
-          });
+            this.numberSlot[0].values = arr;
+          } else {
+            // this.$message.error(data.message || `操作失败,请重试！`); 
+          }
+        }).catch((err) => {
+          console.log(err);
+        });
       },
       // '########:::::'###:::::'######:::'########:
       //  ##.... ##:::'## ##:::'##... ##:: ##.....::
@@ -363,15 +354,11 @@
       currentPage(newValue, oldValue) {
         this.numberSlot[0].defaultIndex = newValue - 1;
       },
-      isSearch(newValue, oldValue){
-        if(!newValue){
-          this.userName = '';
-        this.phoneNum = '';
-        // this.searchData = {
-        //   name: "",
-        //   phone: ""
-        // };
-        this.getTable();
+      isSearch(newValue, oldValue) {
+        if (!newValue) {
+          this.userName = this.searchData.name = '';
+          this.phoneNum = this.searchData.phone = '';
+          this.getTable(1);
         }
       }
     },
@@ -379,14 +366,9 @@
       next(vm => {
         vm.getTable();
       });
-    },
-    //实时计算
-    computed: {
-      // ...mapGetters([
-      //     'departmentId'
-      // ])
-    },
+    }
   }
+
 </script>
 <style scoped>
   .span-right-search {
@@ -471,7 +453,7 @@
   /* 底部分页区域 */
 
   .bottom-page {
-
+    background-color: #fff;
     border-top: 1px solid #ddd;
     box-shadow: -1px 1px 4px 2px rgba(5, 5, 5, 0.1);
     height: 5rem;
@@ -546,6 +528,7 @@
   .search-block .search-btns {
     padding: 1rem 0;
   }
+
 </style>
 <style>
   .is-right .mint-switch {
@@ -555,4 +538,5 @@
   .is-right .mint-switch-input:checked+.mint-switch-core {
     background-color: #653be6;
   }
+
 </style>

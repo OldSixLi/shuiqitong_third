@@ -162,6 +162,8 @@
         currentRow: {
 
         },
+        pageSize:10,
+        pageSize2:10,
         currentPage2: 1, //列表的当前页
         totalPage2: 0, //列表的总页数,
         totalNum2: 0,
@@ -169,10 +171,10 @@
     },
     methods: {
       indexMethod(index){
-        return (this.currentPage1 || 1) * this.pageSize + index - 9;
+        return (this.currentPage1 || 1) * (this.pageSize||10) + index - 9;
       },
       indexMethod2(index){
-        return (this.currentPage2 || 1) * this.pageSize2 + index - 9;
+        return (this.currentPage2 || 1) * (this.pageSize2||10) + index - 9;
       },
       modalClose() {
         this.currentRow={};

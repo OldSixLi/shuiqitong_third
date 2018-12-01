@@ -6,6 +6,32 @@
       :modal-append-to-body='false' width="70%">
       <el-row>
         <el-col :span="24">
+
+            <el-form>
+                <el-row :gutter="20">
+                  <el-col :span="10">
+                    <el-form-item label="公司名称" label-width="100px" style="margin-bottom: 0;">
+                      <el-input v-model.trim="keyWord" clearable placeholder="请输入关键字"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="11">
+                    <el-form-item label="公司税号" label-width="100px" style="margin-bottom: 0;">
+                      <!-- <el-date-picker v-model="dateValue" type="daterange" style="width:100%" align="right" unlink-panels value-format="yyyy-MM-dd" 
+                        range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2">
+                      </el-date-picker> -->
+
+                      <el-input v-model.trim="sh" clearable placeholder="请输入公司税号"></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="3"><el-button style="width:100%;" type="primary" icon="el-icon-search" @click="searchList">查询</el-button></el-col>
+                </el-row>
+                
+              </el-form>
+              <!-- <p class="text-right" style="margin-bottom:0;">
+                  
+                </p> -->
+        
+
           <p class="table-title">
             <span>企业列表</span>
             <span style="float:right;">已选择{{selectedComIds.length}}家公司</span>
@@ -28,7 +54,7 @@
             </el-table-column>
             <el-table-column label="管理员" align="center">
               <template slot-scope="scope">
-                {{scope.row.auditor||"-"}}
+                {{scope.row.managerName||"-"}}
               </template>
             </el-table-column>
             <el-table-column prop="PHONE" label="联系电话" align="center">
@@ -63,6 +89,9 @@
     name: "ComSelect",
     //对外获取的数据
     props: {
+      dateValue: '',
+      keyWord:"",
+      sh:'',
       comIds: {
         type: Array,
         required: false
@@ -154,7 +183,7 @@
         return getWindowHeight() - 100;
       },
       getTable() {
-        this.$post(`/greatchn/audit/entList`, {
+        this.$post(`/greatchn/audit/enterpriseList`, {
           state: 1,
           currentPage: this.currentPage1
         }).then(data => {

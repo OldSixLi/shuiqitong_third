@@ -20,15 +20,8 @@ export default [{
       icon: "el-icon-document",
       funPoint: "ask"
     },
-    children: [{
-        path: "/ask/add",
-        name: "添加问题",
-        component: () => import("@/page/ask/add.vue"),
-        meta: {
-          title: "添加问题",
-          funPoint: "ask-add"
-        },
-      },
+    children: [
+      
       {
         path: "/ask/list",
         name: "问题列表",

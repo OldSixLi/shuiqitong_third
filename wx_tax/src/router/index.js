@@ -9,10 +9,10 @@
 import Router from 'vue-router';
 import Empty from '@/page/empty.vue';
 import Lost from '@/page/404.vue';
-import system from './module/system.js';
-import ask from './module/ask.js';
-import message from './module/message.js';
-import question from './module/questionnaire.js';
+import system from '@/router/module/system.js';
+import ask from '@/router/module/ask.js';
+import message from '@/router/module/message.js';
+import question from '@/router/module/questionnaire.js';
 
 Vue.use(Router);
 /*

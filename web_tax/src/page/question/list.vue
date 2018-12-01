@@ -20,8 +20,7 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="提问时间" label-width="100px" style="margin-bottom: 0;">
-                <el-date-picker v-model="dateValue" type="daterange" style="width:100%" align="right" unlink-panels value-format="yyyy-MM-dd" 
-                  range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2">
+                <el-date-picker v-model="dateValue" type="daterange" style="width:100%" align="right" unlink-panels value-format="yyyy-MM-dd" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions2">
                 </el-date-picker>
               </el-form-item>
             </el-col>
