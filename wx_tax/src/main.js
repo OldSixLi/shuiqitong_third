@@ -11,8 +11,8 @@ import '@/util/common.js';
 import '@/util/filter/time.js';
 
 Vue.config.productionTip = false;
-// let vConsole = process.env.NODE_ENV === 'production' ? null : new VConsole();
-let vConsole = new VConsole();
+let vConsole = process.env.NODE_ENV === 'production' ? null : new VConsole();
+// let vConsole = new VConsole();
 new Vue(
   //注册Vue实例
   {

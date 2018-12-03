@@ -4,7 +4,7 @@
  */
 const devUrl = `http://192.168.106.12:8080/`;
 const prodUrl = `http://dev-ws.htyfw.com.cn:18300/`;
-export const serviceUrl = process.env.NODE_ENV === 'production' ? prodUrl : devUrl;
+export const serviceUrl = process.env.NODE_ENV === 'production' ? prodUrl : prodUrl;
 
 /**
  * token信息 区分开发环境与生产环境

@@ -42,14 +42,14 @@
             </el-table-column>
             <el-table-column type="index" width="50" fixed align="center">
             </el-table-column>
-            <el-table-column prop="ENT_NAME" label="公司名称">
+            <el-table-column prop="entName" label="公司名称">
             </el-table-column>
 
-            <el-table-column prop="SH" label="税号" align="center">
+            <el-table-column prop="sh" label="税号" align="center">
             </el-table-column>
             <el-table-column label="	审核通过时间" align="center">
               <template slot-scope="scope">
-                {{scope.row.REQUEST_TIME|toTime}}
+                {{scope.row.requestTime|toTime}}
               </template>
             </el-table-column>
             <el-table-column label="管理员" align="center">
@@ -57,7 +57,7 @@
                 {{scope.row.managerName||"-"}}
               </template>
             </el-table-column>
-            <el-table-column prop="PHONE" label="联系电话" align="center">
+            <el-table-column prop="phone" label="联系电话" align="center">
             </el-table-column>
           </el-table>
           <div style="margin-top:15px;">
@@ -143,7 +143,7 @@
             }
           });
           if (val.length) {
-            let idArr = val.reduce((a, b) => a.concat(b.ID), []);
+            let idArr = val.reduce((a, b) => a.concat(b.enterpriseId), []);
             this.selectedComIds = [...new Set([...totalSet, ...idArr])];
           } else {
             this.selectedComIds = [...totalSet];
@@ -183,7 +183,7 @@
         return getWindowHeight() - 100;
       },
       getTable() {
-        this.$post(`/greatchn/audit/enterpriseList`, {
+        this.$post(`tax/enterprise/enterpriseList`, {
           state: 1,
           currentPage: this.currentPage1
         }).then(data => {
@@ -193,7 +193,7 @@
             let arr = data.bean.data;
             let currentIds = [];
             //收集当前的几个公司ID
-            arr.forEach(com => currentIds.push(com.ID));
+            arr.forEach(com => currentIds.push(com.enterpriseId));
             this.currentComs = currentIds;
             //table数据赋值
             this.tableData = arr;
@@ -205,7 +205,7 @@
               let totalSet = new Set(this.selectedComIds);
               console.log(this.selectedComIds);
               this.tableData.forEach(row => {
-                if (totalSet.has(row.ID)) {
+                if (totalSet.has(row.enterpriseId)) {
                   checkedRows.push(row);
                   this.$refs.tableSet && this.$refs.tableSet.toggleRowSelection(row, true);
                 }

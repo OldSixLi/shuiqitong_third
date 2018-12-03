@@ -116,7 +116,7 @@
               {{scope.row.passTime|toTime}}
             </template>
           </el-table-column>
-          <el-table-column prop="manager" label="管理员">
+          <el-table-column prop="managerName" label="管理员">
           </el-table-column>
           <el-table-column prop="phone" label="联系电话" align="center">
           </el-table-column>
