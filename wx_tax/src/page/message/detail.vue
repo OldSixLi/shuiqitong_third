@@ -4,16 +4,51 @@
       <mt-button icon="back" @click="topBack" slot="left">{{"消息详情"}}</mt-button>
     </mt-header>
     <div class="page-content">
-      <p class="text-left question-title">{{obj.title||""}}</p>
+
+<!-- 
+        ONTENT
+        :
+        "测试第三方应用与自建应用使用不同的数据库"
+        CREATE_TIME
+        :
+        1543546819000
+        CREATE_USER_ID
+        :
+        16
+        ID
+        :
+        125
+        MSGTYPE
+        :
+        "textcard"
+        STATE
+        :
+        "1"
+        TITLE
+        :
+        "测试更换数据库消息"
+        TYPE
+        :
+        "1"
+        createName
+        :
+        "张瑶" -->
+      <p class="text-left question-title">{{obj.TITLE||""}}</p>
       <p class="text-left ask-time">
-        <img src="@/assets/img/time.png" class="time-icon">
-        <span v-if="obj.createTime"> 发布时间 : {{ obj.createTime | toStamp | toTime}}</span></p>
-      <div class="answer-area">{{obj.content}}</div>
+        <!-- <img src="@/assets/img/time.png" class="time-icon">
+        <span v-if="obj.CREATE_TIME"> 发布时间 : {{ obj.CREATE_TIME | toTime}}</span> -->
+        <icon-word class="time-icons" style="margin-left:0.4rem;" :src="require('@/assets/img/time.png')" >发布时间：{{obj.CREATE_TIME | toTime}}</icon-word>
+        <icon-word class="time-icons" style="margin-left:1.4rem;" :src="require('@/assets/img/user.png')" >发布人：{{obj.createName}}</icon-word>
+      </p>
+      <div class="answer-area">{{obj.CONTENT}}</div>
       <mt-button size="small" type="primary" style="float:right;" @click="topBack">返回列表</mt-button>
     </div>
   </div>
 </template>
 <script>
+   import {
+    mapGetters
+  } from 'vuex'; import IconWord from '@/components/IconWord';
   export default {
     name: "MessageDetail",
     data() {
@@ -23,15 +58,29 @@
         isRead: false
       }
     },
+    components: {
+      IconWord
+    },
     created() {
       this.detailId = this.$param(this).id;
     },
+     //实时计算
+     computed: {
+      ...mapGetters([
+        'currentMsgInfo'
+      ])},
     beforeRouteEnter(to, from, next) {
       next(vm => {
         vm.detailId = to.params.id;
-        vm.isRead = to.query && to.query.isRead == "1";
-        vm.obj = {};
-        vm.getDetail(vm.detailId);
+        vm.obj=vm.currentMsgInfo;
+        if(!vm.currentMsgInfo.TITLE){
+          Vue.prototype.$back();
+        }
+        console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+        console.log(vm.obj);
+        console.log(vm.currentMsgInfo);
+        console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+      
       });
     },
     methods: {
@@ -80,9 +129,9 @@
       }
     },
     watch: {
-      detailId(newValue, oldValue) {
-        this.getDetail(newValue);
-      }
+      // detailId(newValue, oldValue) {
+      //   this.getDetail(newValue);
+      // }
     },
     beforeRouteUpdate (to, from, next) {
       this.obj = {};

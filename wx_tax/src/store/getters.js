@@ -9,6 +9,7 @@
 "use strict"
 const getters = {
   currentUserInfo: state => state.currentUserInfo,
+  currentMsgInfo: state => state.currentMsgInfo,
   checkValue: state => state.checkValue,
   companyTree: state => state.companyTree,
   wxComTree: state => state.wxComTree,

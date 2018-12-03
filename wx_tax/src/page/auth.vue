@@ -1,7 +1,7 @@
 <template>
   <div class="router-block">
-    <!-- <h2 class="text-center">授权页面跳转</h2>
-    <p> {{code}}</p>  -->
+    <!-- <h2 class="text-center">授权页面跳转</h2> -->
+    <!-- <p> {{code}}</p>  -->
   </div>
 </template>
 <script>
@@ -130,7 +130,11 @@
           if (vm.code) {
             vm.getInfo();
           }
-        } catch (error) {}
+        } catch (error) {
+          console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+          console.log(error);
+          console.log("■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■");
+        }
       })
     }
   }

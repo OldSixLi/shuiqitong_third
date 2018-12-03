@@ -29,7 +29,7 @@
         <span v-if="!detailObj.RESPONSE">回复问题</span>
         <!-- <p v-if="!detailObj.RESPONSE" class="nomore-data"> -->
         <div style="height:100%;">
-          <textarea v-if="!detailObj.RESPONSE" v-model="response" placeholder="请在此输入问题的回复" style="" class="textarea-ans" row="10" col="10"></textarea>
+          <textarea v-if="!detailObj.RESPONSE" v-model.trim="response" placeholder="请在此输入问题的回复" style="" class="textarea-ans" row="10" col="10"></textarea>
         </div>
         <!-- </p> -->
       </div>
@@ -128,6 +128,7 @@
 </script>
 <style scoped>
   .textarea-ans {
+    font-family: "MicroSoft YaHei";
     width: 100%;
     height: 100%;
     box-sizing: border-box;

@@ -45,12 +45,17 @@ const store = new Vuex.Store({
      ##::. ##: ########:. ###. ###::
     ..::::..::........:::...::...:::
     */
-   currentUserInfo:{}
+  //  程序执行时的一些中间变量
+   currentUserInfo:{},
+   currentMsgInfo:{},
   },
   getters,
   mutations: {
     setCurrentUser(state, user){
       state.currentUserInfo=user;
+    },
+    setCurrentMsg(state, info){
+      state.currentMsgInfo=info;
     },
     /**
      * 修改token 

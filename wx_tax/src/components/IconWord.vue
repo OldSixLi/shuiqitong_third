@@ -3,7 +3,9 @@
 <template>
   <div class="icon-area">
       <img :src="src" class="time-icon">
-      <span v-show="word" class="icon-text">{{word}}</span>
+      <span  class="icon-text">
+          {{word}}
+        <slot></slot></span>
   </div>
 </template>
 <script>
@@ -30,8 +32,12 @@
   }
   .icon-area{
     display: inline-block;
+    position: relative;
   }
   .icon-area+.icon-area{
     margin-left: 2rem;
+  }
+  .time-icon{
+    margin-right: 0;
   }
 </style>

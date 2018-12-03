@@ -11,22 +11,45 @@
     </mt-navbar>
     <mt-tab-container v-model="currentPanel">
       <mt-tab-container-item id="1">
-        <div class="ask-li msg-child" v-if="askList1.length>0" v-for="(x,$index)  in askList1" @click="toDetail(x.id||'1')">
-          <p class="title"> {{x.queTitle}}</p>
-          <!-- 消息时间 -->
-          <p class="time"><img src="@/assets/img/time.png"><span>{{x.queTime | toStamp |toTime}}</span></p>
+
+
+        <p v-show="loading1" class="page-infinite-loading">
+          <mt-spinner type="fading-circle"></mt-spinner>
+          加载中...
+        </p>
+
+
+        <div v-show="!loading1">
+          <div class="ask-li msg-child" v-if="askList1.length>0" v-for="(x,$index)  in askList1" @click="toDetail(x.id||'1')">
+            <p class="title"> {{x.queTitle}}</p>
+            <!-- 消息时间 -->
+            <p class="time"><img src="@/assets/img/time.png"><span>{{x.queTime | toStamp |toTime}}</span></p>
+          </div>
+          <result v-show="askList1.length==0" title="暂无已回复问题"/>
         </div>
-        <result v-show="askList1.length==0" />
+
         <page :page-param="pageParam1" @pageChange="pageChange1"></page>
       </mt-tab-container-item>
       <mt-tab-container-item id="2">
-        <div class="ask-li msg-child" v-if="askList0.length>0" v-for="(x,$index)  in askList0" @click="toDetail(x.id||'1')">
-          <p class="title"> {{x.queTitle}}</p>
-          <!-- 消息时间 -->
-          <p class="time"><img src="@/assets/img/time.png"><span>{{x.queTime | toStamp |toTime}}</span></p>
+
+        <p v-show="loading0" class="page-infinite-loading">
+          <mt-spinner type="fading-circle"></mt-spinner>
+          加载中...
+        </p>
+
+        <div v-show="!loading0">
+          <div class="ask-li msg-child" v-if="askList0.length>0" v-for="(x,$index)  in askList0" @click="toDetail(x.id||'1')">
+            <p class="title"> {{x.queTitle}}</p>
+            <!-- 消息时间 -->
+            <p class="time"><img src="@/assets/img/time.png"><span>{{x.queTime | toStamp |toTime}}</span></p>
+          </div>
+          <result v-show="askList0.length==0" title="暂无待回复问题"/>
+
+
         </div>
-        <result v-show="askList0.length==0" />
         <page :page-param="pageParam0" @pageChange="pageChange0"></page>
+
+
       </mt-tab-container-item>
     </mt-tab-container>
   </div>
@@ -62,7 +85,9 @@
         askList1: [],
         // 未回答
         askList0: [],
-        showCount: 10
+        showCount: 10,
+        loading1: false,
+        loading0: false
       }
     },
     methods: {
@@ -92,7 +117,7 @@
        * @returns 
        */
       getQuestionList(state, showCount = this.showCount) {
-        let currentPage = this[`pageParam${state}`].currentPage||1;
+        let currentPage = this[`pageParam${state}`].currentPage || 1;
         this[`loading${state}`] = true;
         this.$get(`/tax/queres/queList`, {
             currentPage,
@@ -116,7 +141,9 @@
               this[`currentPage${state}`] = 0;
               this[`totalPage${state}`] = 0;
               this.$alert("请求服务失败，请重试!");
-            });
+            }).finally(() => {
+            this[`loading${state}`] = false;
+          });
       },
       toDetail(id) {
         this.$to(`/ask/detail/${id}`)
@@ -126,14 +153,13 @@
       next(vm => {
         vm.askList1 = vm.askList0 = [];
         vm.getQuestionList("0");
-      vm.getQuestionList("1");
+        vm.getQuestionList("1");
         if (to.query && to.query.panel == '2') {
           vm.currentPanel = '2';
         }
       })
     }
   }
-
 </script>
 <style scoped>
   .container {
@@ -197,7 +223,6 @@
     top: -0.2rem;
     color: #8b8b8b;
   }
-
 </style>
 <style>
   .mint-tab-item .mint-tab-item-label {
@@ -207,5 +232,4 @@
   .ask-li {
     line-height: 50px;
   }
-
 </style>

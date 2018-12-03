@@ -20,11 +20,11 @@
 开发环境
 */
 // token信息
-export const token = "tax_f87cdd00289d4944ad213715312fa5d1";
-//企业微信中UserID
-export const wxUserId = "";
-//企业微信中公司ID
-export const wxComId = "wxa059996e5d72516b";
+// export const token = "tax_f87cdd00289d4944ad213715312fa5d1";
+// //企业微信中UserID
+// export const wxUserId = "";
+// //企业微信中公司ID
+// export const wxComId = "wxa059996e5d72516b";
 
 /*
 '########::'########:::'#######::'########::
@@ -38,11 +38,11 @@ export const wxComId = "wxa059996e5d72516b";
 正式环境
 */
 // token信息
-// export const token = "";
-// //企业微信中UserID
-// export const wxUserId = "";
-// //企业微信中公司ID
-// export const wxComId = "";
+export const token = "";
+//企业微信中UserID
+export const wxUserId = "";
+//企业微信中公司ID
+export const wxComId = "";
 
 /**
  * 接口地址 
@@ -68,14 +68,20 @@ export const coprId = "wxa059996e5d72516b";
 /**
  * 当前应用appId 
  * @returns 
- */
+ * 
+ */	
 export const appId = "wxd8ed9a1dc046aaf8";
 
 /**
  * 微信端获取详情地址
  * @returns 
  */
-export const wxAuthUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=snsapi_privateinfo`;
+
+
+// export const wxAuthUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodeURIComponent(this.auth)}&response_type=code&scope=snsapi_base&state=STATE#${to.query.path}`;
+
+
+export const wxAuthUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=code&scope=snsapi_base`;
 
 //系统中所有用户均可访问的功能
 export const baseRights = [
