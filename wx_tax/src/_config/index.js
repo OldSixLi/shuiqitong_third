@@ -37,7 +37,7 @@
 ..:::::::::..:::::..:::.......:::........:::
 正式环境
 */
-// token信息
+// // token信息
 export const token = "";
 //企业微信中UserID
 export const wxUserId = "";

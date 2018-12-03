@@ -58,9 +58,9 @@
     methods: {
 
       clearStroage() {
-        let storage = window.localStorage;
-        storage.setItem('currenComId', '');
-        storage.setItem('comUserId', '');
+        // let storage = window.localStorage;
+        mystorage.setItem('currenComId', '');
+        mystorage.setItem('comUserId', '');
       },
       toasts() {
         Toast({

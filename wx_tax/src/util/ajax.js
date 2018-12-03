@@ -23,9 +23,9 @@ import store from '@/store/index.js';
 /**
  * 全局统一ajax配置 
  */
-let storage = window.localStorage;
+// let storage = window.localStorage;
 axios.defaults.baseURL = BASE_URL;
-axios.defaults.headers.common['token'] = storage.getItem('shuiqitong_token') || store.state.token;
+axios.defaults.headers.common['token'] = mystorage.getItem('shuiqitong_token') || store.state.token;
 
 /*
 '##::::'##::::'###::::'##::: ##:'########::'##:::::::'########:'########::
@@ -132,14 +132,14 @@ function errorHandler(ajaxData) {
     let msgState = ajaxData.message;
     if (msgState == "-1") {
       //如果用户登录身份失效
-      // storage.setItem('shuiqitong_token', '');
-      // storage.setItem('comUserId', '');
-      // storage.setItem('currenComId', '');
-      // if (storage.getItem('isTokenFail') != "1") {
-      //   storage.setItem('isTokenFail', '1');
-      //   alert(`您的登陆信息已失效,请重新登陆!`);
-      //   Vue.prototype.$to("/first");
-      // }
+      mystorage.setItem('shuiqitong_token', '');
+      mystorage.setItem('comUserId', '');
+      mystorage.setItem('currenComId', '');
+      if (mystorage.getItem('isTokenFail') != "1") {
+        mystorage.setItem('isTokenFail', '1');
+        alert(`您的登陆信息已失效,请重新登陆!`);
+        Vue.prototype.$to("/first");
+      }
     }
     // -2 企业信息不存在、已被作废
     // -3 企业未提交审核  
