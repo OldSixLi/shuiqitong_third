@@ -2,6 +2,7 @@ package com.greatchn.controller.web.tax;
 
 
 import com.greatchn.bean.Result;
+import com.greatchn.common.annotation.LoginRequired;
 import com.greatchn.common.utils.Constant;
 import com.greatchn.common.utils.RedisUtils;
 import com.greatchn.controller.BaseController;
@@ -66,6 +67,26 @@ public class TaxLoginController extends BaseController {
     }
 
     /**
+     * 税务局第三方应用登录
+     *
+     * @author zy 2018-11-12
+     */
+    @RequestMapping("/login")
+    public Result login(String code, @RequestHeader(name = "token") String token) throws IOException, URISyntaxException {
+        return Result.success(taxLoginSrv.login(code, get32UUID(), token));
+    }
+
+    /**
+     * 税务局第三方应用重新登录
+     *
+     * @author zy 2018-11-12
+     */
+    @RequestMapping("/reLogin")
+    public Result reLogin(String userId, String corpId, @RequestHeader(name = "token") String token) throws IOException, URISyntaxException {
+        return Result.success(taxLoginSrv.excuteLogin(corpId, userId, get32UUID(), token));
+    }
+
+    /**
      * 退出登录
      *
      * @author zy 2018-10-11
@@ -82,6 +103,23 @@ public class TaxLoginController extends BaseController {
             }
         }
         return Result.success("退出登录成功");
+    }
+
+
+    /**
+     * 获取用户的角色，权限并进行更新
+     *
+     * @author zy 2018-11-14
+     */
+    @LoginRequired
+    @RequestMapping("/getRoleAndRight")
+    public Result getRoleAndRight(@RequestHeader(name = "token") String token) throws IOException, URISyntaxException {
+        Map<String, Object> map = taxLoginSrv.getRoleAndRight(token);
+        if (StringUtils.isNotBlank((String) map.get("msg"))) {
+            return Result.fail((String) map.get("msg"));
+        } else {
+            return Result.success(map);
+        }
     }
 
 }

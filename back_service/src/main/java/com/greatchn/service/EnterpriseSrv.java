@@ -3,6 +3,7 @@ package com.greatchn.service;
 import com.greatchn.bean.Page;
 import com.greatchn.bean.PageData;
 import com.greatchn.common.dao.BaseDao;
+import com.greatchn.po.TaxUserRole;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.type.*;
 import org.springframework.stereotype.Service;
@@ -36,10 +37,13 @@ public class EnterpriseSrv {
                 "ei.MANAGER manager, " +
                 "ai.REQUEST_TIME requestTime, " +
                 "ai.PASS_TIME passTime, " +
-                "ei.CORP_ID corpId " +
+                "ei.CORP_ID corpId," +
+                "e.`NAME` managerName " +
                 "FROM " +
                 "audit_info ai " +
-                "INNER JOIN enterprise_info ei ON ei.ID = ai.ENT_TAX_ID where 1=1 ";
+                "INNER JOIN enterprise_info ei ON ei.ID = ai.ENT_TAX_ID " +
+                "INNER JOIN employee_info e ON ei.MANAGER = e.USER_ID AND ei.CORP_ID = e.ENTERPRISE_ID " +
+                "where 1=1 ";
         if(enterpriseId!=null){
             sql += "and ei.TAX_ID = ? ";
             params.add(enterpriseId);
@@ -55,6 +59,7 @@ public class EnterpriseSrv {
         types.put("requestTime", TimestampType.INSTANCE);
         types.put("passTime", TimestampType.INSTANCE);
         types.put("corpId", StringType.INSTANCE);
+        types.put("managerName", StringType.INSTANCE);
         Map<String, Type> typeNum = new HashMap<>();
         typeNum.put("num", LongType.INSTANCE);
         Map<String, Object> countNum = baseDao.uniqueBySQL(sqlCount, typeNum, params.toArray());
@@ -188,5 +193,105 @@ public class EnterpriseSrv {
         page.setTotalPage(page.getTotalPage());
         List<Map<String,Object>> list = baseDao.queryBySQL(sql, types, page.getCurrentPage(), page.getShowCount(), params.toArray());
         return list;
+    }
+
+    public List<TaxUserRole> findUserRole(Integer userId){
+        List<Object> params = new ArrayList<>();
+        String sql = "select * from tax_user_role where USER_ID = ?";
+        params.add(userId);
+        List<TaxUserRole> list = baseDao.queryBySql(sql,TaxUserRole.class,params.toArray());
+        return list;
+    }
+
+    public List<Map<String,Object>> findUserLabel(String roleId,Integer userId,Integer enterpriseId){
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT " +
+                "tul.LABEL_ID labelId, "+
+                "li.`NAME` labelName, " +
+                "li.ENTERPRISE_ID enterpriseId "+
+                "FROM " +
+                "tax_user_label tul " +
+                "INNER JOIN label_info li ON tul.LABEL_ID = li.ID " +
+                "WHERE " +
+                "tul.TAX_ID = ? ";
+        params.add(enterpriseId);
+        if(userId!=null){
+            sql += "and tul.USER_ID regexp ? ";
+            params.add(userId);
+        }
+        if(StringUtils.isNotEmpty(roleId)){
+            sql += "and tul.ROLE_ID regexp ?";
+            params.add(roleId);
+        }
+        if (userId!=null&&StringUtils.isNotEmpty(roleId)){
+            sql += "and tul.USER_ID regexp ? or tul.ROLE_ID regexp ? ";
+            params.add(userId);
+            params.add(roleId);
+        }
+        sql += "GROUP BY tul.LABEL_ID ";
+        Map<String,Type> types = new HashMap<>();
+        types.put("labelId",IntegerType.INSTANCE);
+        types.put("labelName",StringType.INSTANCE);
+        types.put("enterpriseId",StringType.INSTANCE);
+        List<Map<String,Object>> list = baseDao.queryBySQL(sql,types,params.toArray());
+        return list;
+    }
+
+    public List<Map<String,Object>> findUserLabelEnterprise(Page page,String roleId,Integer userId,Integer taxId){
+        List<Map<String,Object>> userLabels = findUserLabel(roleId,userId,taxId);
+        for (Map<String,Object> userLabel : userLabels){
+            String enterpriseIds = userLabel.get("enterpriseId").toString();
+            String[] enterpriseId = enterpriseIds.split(",");
+            String enterprise = "";
+            for (int i=0;i<enterpriseId.length;i++){
+                enterprise += enterpriseId[i] + "|";
+            }
+            List<Object> params = new ArrayList<>();
+            String sql = "SELECT " +
+                    "ei.ID enterpriseId, " +
+                    "ei.SH sh, " +
+                    "ei.ENT_NAME entName, " +
+                    "ei.PHONE phone, " +
+                    "ei.MANAGER manager, " +
+                    "ai.REQUEST_TIME requestTime, " +
+                    "ai.PASS_TIME passTime, " +
+                    "ei.CORP_ID corpId " +
+                    "FROM " +
+                    "audit_info ai " +
+                    "INNER JOIN enterprise_info ei ON ei.ID = ai.ENT_TAX_ID " +
+                    "WHERE 1 = 1 ";
+            if (taxId!=null){
+                sql += "AND ei.TAX_ID = ? ";
+                params.add(taxId);
+            }
+            if (StringUtils.isNotEmpty(enterprise)){
+                sql += "AND ai.ID regexp ? ";
+                params.add(enterprise.substring(0,enterprise.length()-1));
+            }
+            sql += "AND ai.AUDIT_TYPE = '1' " +
+                    "AND ai.STATE = '1' " +
+                    "ORDER BY passTime DESC";
+            String sqlCount = "select count(s.enterpriseId) num from ( " + sql + ") s ";
+            Map<String, Type> types = new HashMap<>();
+            types.put("enterpriseId", IntegerType.INSTANCE);
+            types.put("sh", StringType.INSTANCE);
+            types.put("entName", StringType.INSTANCE);
+            types.put("phone", StringType.INSTANCE);
+            types.put("manager", StringType.INSTANCE);
+            types.put("requestTime", TimestampType.INSTANCE);
+            types.put("passTime", TimestampType.INSTANCE);
+            types.put("corpId", StringType.INSTANCE);
+            Map<String, Type> typeNum = new HashMap<>();
+            typeNum.put("num", LongType.INSTANCE);
+            Map<String, Object> countNum = baseDao.uniqueBySQL(sqlCount, typeNum, params.toArray());
+            int count = Integer.valueOf(String.valueOf(countNum.get("num")));
+            // 记录总数
+            page.setTotalResult(count);
+            // 记录页数
+            page.setTotalPage(page.getTotalPage());
+            List<Map<String,Object>> list = baseDao.queryBySQL(sql, types, page.getCurrentPage(), page.getShowCount(), params.toArray());
+            userLabel.put("enterpriseList",list);
+        }
+        return userLabels;
     }
 }

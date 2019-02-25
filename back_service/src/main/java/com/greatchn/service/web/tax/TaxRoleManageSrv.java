@@ -4,6 +4,7 @@ import com.greatchn.common.dao.BaseDao;
 import com.greatchn.common.utils.Constant;
 import com.greatchn.common.utils.RedisUtils;
 import com.greatchn.po.*;
+import com.greatchn.service.AuditService;
 import com.greatchn.service.ent.EnterpriseService;
 import com.greatchn.service.tax.TaxService;
 import com.greatchn.service.wechat.AccessTokenService;
@@ -43,6 +44,9 @@ public class TaxRoleManageSrv {
 
     @Resource
     AccessTokenService accessTokenService;
+
+    @Resource
+    AuditService auditService;
 
     /**
      * 角色列表
@@ -429,79 +433,95 @@ public class TaxRoleManageSrv {
 
 
     /**
-     * 将管理员身份移交给其他用户
-     */
-    public void transformAdministrator(String userId, Integer taxId) {
-
-    }
-
-
-    /**
      * 保存用户初始化信息
      */
     @Transactional(rollbackFor = Exception.class)
-    public Map<String, Object> saveinitEmployeeInfo(String corpId, String userId, Integer taxId) throws IOException, URISyntaxException {
+    public Map<String, Object> initEmployeeInfoAndTransform(String corpId, String userId, Integer taxId) throws IOException, URISyntaxException {
         // 不存在，访问微信接口获取员工信息，保存新的员工
         Map<String, Object> resultMap = new HashMap<>(2);
         String msgKey = "msg";
-        // 查询员工信息是否存在
-        EmployeeInfo employeeInfo = enterpriseService.findEmplyeeInfo(corpId, userId);
-        if (employeeInfo == null) {
-            Map<String, Object> map = null;
-            // 获取当前企业token
-            String accessToken;
-            if (Constant.IS_SELF_BUILT_LOGIN) {
-                accessToken = accessTokenService.getAccessTokenBySelfBuilt("phone");
-            } else {
-                map = accessTokenService.getAccessTokenByPermanentCode(corpId, Constant.GET_INFO_TYPE_TAX);
+        TaxInfo taxInfo=taxService.getTaxInfoById(taxId);
+        if(taxInfo!=null&&StringUtils.equals(Constant.EFFECTIVE_STATE,taxInfo.getState())){
+            // 查询员工信息是否存在
+            EmployeeInfo employeeInfo = enterpriseService.findEmplyeeInfo(corpId, userId);
+            if (employeeInfo == null) {
+                Map<String, Object> map = null;
                 // 获取当前企业token
-                accessToken = (String) map.get("accessToken");
-            }
-            if (StringUtils.isNotEmpty(accessToken)) {
-                Map<String, Object> employeeMap = taxService.saveInitUserInfo(employeeInfo, corpId, userId, taxId);
-                if (StringUtils.isBlank((String) employeeMap.get(msgKey))) {
-                    employeeInfo = (EmployeeInfo) employeeMap.get("employeeInfo");
+                String accessToken;
+                if (Constant.IS_SELF_BUILT_LOGIN) {
+                    accessToken = accessTokenService.getAccessTokenBySelfBuilt("phone");
                 } else {
-                    resultMap.put(msgKey, employeeMap.get(msgKey));
+                    map = accessTokenService.getAccessTokenByPermanentCode(corpId, Constant.GET_INFO_TYPE_TAX);
+                    // 获取当前企业token
+                    accessToken = (String) map.get("accessToken");
                 }
-            } else {
-                // 获取accessToken失败
-                resultMap.put(msgKey, "获取微信accessToken失败");
-            }
-        }
-        if (employeeInfo != null) {
-            // 查询是否有用户信息，没有则增加用户信息
-            TaxUserInfo taxUserInfo = taxService.findUserInfo(employeeInfo.getId(), taxId);
-            if (taxUserInfo == null) {
-                taxUserInfo = taxService.saveUserInfo(employeeInfo.getId(), taxId);
-            }
-            // 查询当前用户是否有角色，若没有，增加当前用户角色为普通用户
-            List<Map<String, Object>> userRoleInfos = taxService.getUserRole(taxUserInfo.getId(), taxId);
-            if (userRoleInfos == null || userRoleInfos.size() <= 0) {
-                // 查询普通用户角色信息
-                TaxRoleInfo taxRoleInfo = taxService.findNormalRoleInfo(taxId, "update");
-                if (taxRoleInfo == null) {
-                    taxRoleInfo = new TaxRoleInfo();
-                    taxRoleInfo.setName(Constant.NORMAL_NAME);
-                    taxRoleInfo.setDescription(Constant.NORMAL_DESCRIPTION);
-                    taxRoleInfo.setTaxId(taxId);
-                    taxRoleInfo.setCreateTime(new Timestamp(System.currentTimeMillis()));
-                    taxRoleInfo.setCreator(0);
-                    baseDao.save(taxRoleInfo);
-                    // 保存普通用户角色的默认权限
-                    TaxRoleRight taxRoleRight = new TaxRoleRight();
-                    taxRoleRight.setRightName(Constant.TAX_ALL_ROLE_HAVE_RIGHT);
-                    taxRoleRight.setRoleId(taxRoleInfo.getId());
-                    baseDao.save(taxRoleRight);
+                if (StringUtils.isNotEmpty(accessToken)) {
+                    Map<String, Object> employeeMap = taxService.saveInitUserInfo(employeeInfo, corpId, userId, taxId);
+                    if (StringUtils.isBlank((String) employeeMap.get(msgKey))) {
+                        employeeInfo = (EmployeeInfo) employeeMap.get("employeeInfo");
+                    } else {
+                        resultMap.put(msgKey, employeeMap.get(msgKey));
+                    }
+                } else {
+                    // 获取accessToken失败
+                    resultMap.put(msgKey, "获取微信accessToken失败");
                 }
-                // 保存用户角色信息
-                TaxUserRole taxUserRole = new TaxUserRole();
-                taxUserRole.setRoleId(taxRoleInfo.getId());
-                taxUserRole.setUserId(taxUserInfo.getId());
-                baseDao.save(taxUserRole);
             }
+            if (employeeInfo != null) {
+                // 保存税务分局管理员
+                taxInfo.setManager(userId);
+                baseDao.save(taxInfo);
+                // 查询是否有用户信息，没有则增加用户信息
+                TaxUserInfo taxUserInfo = taxService.findUserInfo(employeeInfo.getId(), taxId);
+                if (taxUserInfo == null) {
+                    taxUserInfo = taxService.saveUserInfo(employeeInfo.getId(), taxId);
+                }
+                // 查询当前用户是否有角色，若没有，增加当前用户角色为普通用户
+                List<Map<String, Object>> userRoleInfos = taxService.getUserRole(taxUserInfo.getId(), taxId);
+                if (userRoleInfos == null || userRoleInfos.size() <= 0) {
+                    // 查询普通用户角色信息
+                    TaxRoleInfo taxRoleInfo = taxService.findNormalRoleInfo(taxId, "update");
+                    if (taxRoleInfo == null) {
+                        taxRoleInfo = new TaxRoleInfo();
+                        taxRoleInfo.setName(Constant.NORMAL_NAME);
+                        taxRoleInfo.setDescription(Constant.NORMAL_DESCRIPTION);
+                        taxRoleInfo.setTaxId(taxId);
+                        taxRoleInfo.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                        taxRoleInfo.setCreator(0);
+                        baseDao.save(taxRoleInfo);
+                        // 保存普通用户角色的默认权限
+                        TaxRoleRight taxRoleRight = new TaxRoleRight();
+                        taxRoleRight.setRightName(Constant.TAX_ALL_ROLE_HAVE_RIGHT);
+                        taxRoleRight.setRoleId(taxRoleInfo.getId());
+                        baseDao.save(taxRoleRight);
+                    }
+                    // 保存用户角色信息
+                    TaxUserRole taxUserRole = new TaxUserRole();
+                    taxUserRole.setRoleId(taxRoleInfo.getId());
+                    taxUserRole.setUserId(taxUserInfo.getId());
+                    baseDao.save(taxUserRole);
+                }
+                // 保存新的管理员信息
+                taxService.userAddManagerRole(taxUserInfo.getId(),taxId);
+                // 更新缓存中管理员所属的税务分局信息
+                Map<String, Object> taxMap = new HashMap<>(2);
+                taxMap.put("taxInfo", taxInfo);
+                // 查询该税务分局对应的审核信息
+                AuditInfo auditInfo=auditService.getAuditInfoByEntTaxId(taxId,null,"2");
+                taxMap.put("auditInfo", auditInfo);
+                String taxInfoKey = RedisUtils.REDIS_PREFIX_TAX + corpId;
+                redisUtils.set(taxInfoKey, taxMap);
+                // 查询当前用户登录信息中的的角色以及权限信息并返回
+                List<Map<String, Object>> list = taxService.getUserRight(taxUserInfo.getId(), taxInfo.getId());
+                resultMap.put("userRight", list);
+                // 获取角色信息，并返回
+                List<Map<String, Object>> roles = taxService.findUserRoleInfos(taxUserInfo.getId(), taxInfo.getId());
+                resultMap.put("roles", roles);
+            }
+        }else{
+            // 税务分局未授权应用或该税务分局信息已被作废
+            resultMap.put(msgKey, "税务分局未授权应用或该税务分局信息已被作废");
         }
-        // TODO 移交管理员未完成
         return resultMap;
     }
 

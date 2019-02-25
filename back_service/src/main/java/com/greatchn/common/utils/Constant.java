@@ -46,22 +46,22 @@ public class Constant {
     /**
      * 税企通税务局第三方应用的suite_Id
      */
-    public static final String TAX_SUITE_ID = "";
+    public static final String TAX_SUITE_ID = "wxd8ed9a1dc046aaf8";
 
     /**
      * 税企通税务局第三方应用的secret
      */
-    public static final String TAX_SUITE_SECRET = "";
+    public static final String TAX_SUITE_SECRET = "z60D6yIKpe2Zd_GsNbTHvfaoVueyclffqJX6l3GBJjM";
 
     /**
      * 税企通税务局第三方应用回调配置中生成签名的token
      */
-    public static final String TAX_CALLBACK_TOKEN = "";
+    public static final String TAX_CALLBACK_TOKEN = "oVbaPuGnmL4OqSiHmeguYCnJgfQ";
 
     /**
      * 税企通税务局第三方应用回调配置的EncodingAESKey
      */
-    public static final String TAX_CALLBACK_ENCODING_AES_KEY = "";
+    public static final String TAX_CALLBACK_ENCODING_AES_KEY = "MSO2G6EKj43TrYDCJSO7u8ObPsoO0CK5EzRbXf3jiG8";
 
 
     /**
@@ -126,7 +126,7 @@ public class Constant {
     /**
      * 是否为自建应用
      */
-    public static final boolean IS_SELF_BUILT_LOGIN = true;
+    public static final boolean IS_SELF_BUILT_LOGIN = false;
 
     /**
      * 企业微信接口错误信息的code的key
@@ -207,12 +207,22 @@ public class Constant {
      */
     public static final boolean IS_TEST = true;
 
+    /**
+     * 第三方应该接口 企业版
+     */
+    public static final String messageUrl = "http://dev-ws.htyfw.com.cn:18301/message/detail/%s";
+
+    public static final String questionUrl = "http://dev-ws.htyfw.com.cn:18301/questionnaire/quesinfo/%s";
+
+    public static final String qrUrl = "http://dev-ws.htyfw.com.cn:18301/ask/detail/%s";
+
+    /*
+    //本地应用0
     public static final String messageUrl = "http://dev-ws.htyfw.com.cn/message/detail/%s";
 
     public static final String questionUrl = "http://dev-ws.htyfw.com.cn/questionnaire/quesinfo/%s";
 
-    public static final String qrUrl = "http://dev-ws.htyfw.com.cn/ask/detail/%s";
-
+    public static final String qrUrl = "http://dev-ws.htyfw.com.cn/ask/detail/%s";*/
 
     /**
      * 税务分局自建应用的secret

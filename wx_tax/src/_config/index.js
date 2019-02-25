@@ -19,12 +19,12 @@
 ........:::........:::::...:::::
 开发环境
 */
-// token信息
-// export const token = "tax_f87cdd00289d4944ad213715312fa5d1";
-// //企业微信中UserID
-// export const wxUserId = "";
-// //企业微信中公司ID
-// export const wxComId = "wxa059996e5d72516b";
+// token信息 此token和web端token是一个
+export const token = "tax_4e8bfa6fd9004de69913414d437d098f";
+//企业微信中UserID
+export const wxUserId = "";
+//企业微信中公司ID
+export const wxComId = "wxa059996e5d72516b";
 
 /*
 '########::'########:::'#######::'########::
@@ -38,11 +38,11 @@
 正式环境
 */
 // // token信息
-export const token = "";
-//企业微信中UserID
-export const wxUserId = "";
-//企业微信中公司ID
-export const wxComId = "";
+// export const token = "";
+// //企业微信中UserID
+// export const wxUserId = "";
+// //企业微信中公司ID
+// export const wxComId = "";
 
 /**
  * 接口地址 

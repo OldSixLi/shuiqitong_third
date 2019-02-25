@@ -279,7 +279,7 @@ public class QuestionSrv {
      * @date 2018-09-15 14:13
      */
     @Transactional(readOnly = false, rollbackFor = Exception.class)
-    public String updateQnaStartAndSend(QNAInfo qna,Integer userId,Timestamp time) throws Exception {
+    public String updateQnaStartAndSend(QNAInfo qna,Integer userId,Timestamp time, Integer taxId) throws Exception {
         qna.setModifyTime(time);
         qna.setModifyUserId(userId);
         if(StringUtils.equals(qna.getState(),"1")){
@@ -303,9 +303,9 @@ public class QuestionSrv {
                     for (int j = 0;j<roleId.length;j++){
                         role += roleId[j]+"|";
                     }
-                    result += restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),role.substring(0,role.length()-1),url,corpId[i]);
+                    result += restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),role.substring(0,role.length()-1),url,corpId[i],taxId);
                 } else {
-                    result = restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),null,url,corpId[i]);
+                    result = restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),null,url,corpId[i],taxId);
                 }
             }
         } else {
@@ -315,9 +315,9 @@ public class QuestionSrv {
                 for (int i = 0;i<roleId.length;i++){
                     role += roleId[i]+"|";
                 }
-                result += restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),role.substring(0,role.length()-1),url,null);
+                result += restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),role.substring(0,role.length()-1),url,null,taxId);
             } else {
-                result = restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),null,url,null);
+                result = restfulSrv.sendMessageOrQuestion("【问卷调查】"+qna.getTitle(),qna.getContent(),null,url,null,taxId);
             }
         }
         return result;

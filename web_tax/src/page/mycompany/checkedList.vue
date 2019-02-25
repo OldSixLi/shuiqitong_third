@@ -86,11 +86,14 @@
         <el-button type="primary" @click="showDetail = false">关 闭</el-button>
       </div>
     </el-dialog>
+   
+
     <el-col :span="22" :offset="1">
       <h2>企业列表</h2>
       <el-row style="margin-top: 15px;">
         <p class="table-title">
           <span>企业列表</span>
+          <el-button type="primary" size="mini" style="float:right" @click="checkComs">审核企业</el-button>
         </p>
         <!--
         '########::::'###::::'########::'##:::::::'########:
@@ -170,11 +173,14 @@
       }
     },
     methods: {
+      checkComs(){
+        this.$to('/company/checking')
+      },
       indexMethod(index){
-        return (this.currentPage1 || 1) * (this.pageSize||10) + index - 9;
+        return (this.currentPage1 || 1) * (this.pageSize||10) + index - this.pageSize+1;
       },
       indexMethod2(index){
-        return (this.currentPage2 || 1) * (this.pageSize2||10) + index - 9;
+        return (this.currentPage2 || 1) * (this.pageSize2||10) + index -this.pageSize2+1;
       },
       modalClose() {
         this.currentRow={};
@@ -252,7 +258,8 @@
       getTable() {
         this.$post(`/tax/enterprise/enterpriseList`, {
           state: 1,
-          currentPage: this.currentPage1
+          currentPage: this.currentPage1,
+          showCount:this.pageSize
         }).then(data => {
           if (data.success) {
             this.tableData = data.bean.data;

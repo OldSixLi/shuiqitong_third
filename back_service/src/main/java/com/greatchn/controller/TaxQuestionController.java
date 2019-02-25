@@ -103,21 +103,28 @@ public class TaxQuestionController extends BaseController {
         Map<String, Object> map = (Map<String, Object>) redisUtils.get(token);
         if (map != null && !map.isEmpty()) {
             TaxUserInfo userInfo = (TaxUserInfo) map.get("userInfo");
-            if (qnaId != null) {
-                QNAInfo qna = questionSrv.findQNA(qnaId);
-                if (qna != null) {
-                    if (StringUtils.equals(qna.getState(), "1")) {
-                        Timestamp time = new Timestamp(System.currentTimeMillis());
-                        String result = questionSrv.updateQnaStartAndSend(qna, userInfo.getId(), time);
-                        return Result.success(result);
+            Map<String, Object> taxMap = (Map<String, Object>) redisUtils.get((String) map.get("taxInfoKey"));
+            String taxInfoRedisKey = "taxInfo";
+            if (taxMap != null && !taxMap.isEmpty() && taxMap.get(taxInfoRedisKey) != null) {
+                TaxInfo taxInfo = (TaxInfo) taxMap.get("taxInfo");
+                if (qnaId != null) {
+                    QNAInfo qna = questionSrv.findQNA(qnaId);
+                    if (qna != null) {
+                        if (StringUtils.equals(qna.getState(), "1")) {
+                            Timestamp time = new Timestamp(System.currentTimeMillis());
+                            String result = questionSrv.updateQnaStartAndSend(qna, userInfo.getId(), time, taxInfo.getId());
+                            return Result.success(result);
+                        } else {
+                            return Result.fail("该问卷不可作废");
+                        }
                     } else {
-                        return Result.fail("该问卷不可作废");
+                        return Result.fail("该问卷不存在");
                     }
                 } else {
-                    return Result.fail("该问卷不存在");
+                    return Result.fail("缺少必要参数");
                 }
             } else {
-                return Result.fail("缺少必要参数");
+                return Result.fail("-1");
             }
         } else {
             return Result.fail("无用户信息");
@@ -255,8 +262,8 @@ public class TaxQuestionController extends BaseController {
      */
     @RequestMapping("/anwerDetail")
     @SuppressWarnings("unchecked")
-    public Result getAnwerDetail(Integer qnaId,Integer userId) {
-        if (qnaId != null && userId!=null) {
+    public Result getAnwerDetail(Integer qnaId, Integer userId) {
+        if (qnaId != null && userId != null) {
             Map<String, Object> detail = questionSrv.getUserAnswerDetail(qnaId, userId);
             if (detail != null) {
                 return Result.success(detail);

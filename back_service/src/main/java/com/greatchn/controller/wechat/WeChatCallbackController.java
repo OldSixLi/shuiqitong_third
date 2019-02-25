@@ -93,10 +93,10 @@ public class WeChatCallbackController {
             int len = request.getContentLength();
             byte[] callbackBody = new byte[len];
             try (ServletInputStream sis = request.getInputStream()) {
-                sis.read(callbackBody, 0, len);
-                String sReqData = new String(callbackBody);
-                CallBackInfoVo callBackInfoVo = new CallBackInfoVo(msg_signature, timestamp, nonce, sReqData);
-                weChatCallBackTask.decryptTaxCallbackInfo(callBackInfoVo);
+                    sis.read(callbackBody, 0, len);
+                    String sReqData = new String(callbackBody);
+                    CallBackInfoVo callBackInfoVo = new CallBackInfoVo(msg_signature, timestamp, nonce, sReqData);
+                    weChatCallBackTask.decryptTaxCallbackInfo(callBackInfoVo);
             } catch (IOException e) {
                 // 获取信息密文错误
                 logger.error("获取信息密文错误", e);
@@ -145,33 +145,4 @@ public class WeChatCallbackController {
         // TODO 接收用户消息的处理
         return "success";
     }
-
-    /**
-     * 获取节点内容测试
-     */
-    @RequestMapping("/getXmlRoot")
-    public void getXmlRoot() {
-       /* String sMsg ="<xml><SuiteId><![CDATA[wx37df32191487c6e8]]></SuiteId><InfoType><![CDATA[suite_ticket]]></InfoType><TimeStamp>1541553630</TimeStamp><SuiteTicket><![CDATA[vGbC1CH8DIl89pfpiYhvvFxd07ienGpiHiI85olJM_wmFWlO-JXv_PptQSmz2knM]]></SuiteTicket></xml>";
-        logger.error("解密后的明文msg: " + sMsg);
-        // 创建一个解析document的工厂
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        // 创建一个builder对象
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        // 字符流读取xml
-        StringReader sr = new StringReader(sMsg);
-        // 将字符流转化为inputSource
-        InputSource is = new InputSource(sr);
-        // 使用builder对象将流转化为document对象
-        Document document = db.parse(is);
-        // 获取根节点
-        Element root = document.getDocumentElement();
-
-        Node node = root.getElementsByTagName("SuiteTicket") == null ? null : root.getElementsByTagName("SuiteTicket").item(0);
-      String value=(node == null ? null : node.getTextContent());
-       logger.info("value===="+value);
-
-        String suiteAccesstoken=accessTokenService.getSuiteAccessToken(Constant.ENTERPRISE_SUITE_ID,Constant.ENTERPRISE_SUITE_SECRET);
-        logger.info("suiteAccessToken"+suiteAccesstoken);*/
-    }
-
 }

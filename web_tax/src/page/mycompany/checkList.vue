@@ -6,7 +6,7 @@
       <h2>企业列表</h2>
       <el-row style="margin-top: 15px;">
         <p class="table-title">
-          <span>待审核企业列表</span>
+          <span>待审核企业列表s</span>
         </p>
 
         <el-table ref="tableSet" border :data="tableData" style="min-width: 100%;" :maxHeight="availHeight()"
@@ -176,7 +176,7 @@
       },
       getTable() {
         this.$post(`/greatchn/audit/entList`, {
-          state: ""
+          state: "0"
         }).then(data => {
           if (data.success) {
             this.tableData = data.bean.data;

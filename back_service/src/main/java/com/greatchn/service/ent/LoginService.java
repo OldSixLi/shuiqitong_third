@@ -415,6 +415,8 @@ public class LoginService {
                 Map<String, Object> employeeMap = new HashMap<>(3);
                 employeeMap.put("userid", object.getString("userid"));
                 employeeMap.put("name", object.getString("name"));
+                // 性别
+                employeeMap.put("gender",object.getString("gender"));
                 // 第三方应用非通讯录应用，无法获取成员的手机号，更换为头像
                 employeeMap.put("avatar", object.getString("avatar"));
                 list.add(employeeMap);
@@ -491,26 +493,18 @@ public class LoginService {
             // 删除原有角色的关联信息
             String sql = "delete eur from ent_user_role eur join ent_user_info eui on eur.USER_ID=eui.ID where eur.ROLE_ID=? and eui.ENTERPRISE_ID=?";
             baseDao.executeSQL(sql, roleId, enterpriseInfo.getId());
-            // 判断是否为管理员角色
-            if (roleId == -1) {
-                enterpriseInfo.setManager(userId);
-                baseDao.update(enterpriseInfo);
-            }
-            // 查询
+            // 初始化用户
             Map<String, Object> map = saveEmployeeInfo(corpId, userId, enterpriseInfo.getId(), enterpriseInfo.getManager());
-            if (map.get("employeeInfo") != null) {
-                EmployeeInfo employeeInfo = (EmployeeInfo) map.get("employeeInfo");
+            EmployeeInfo employeeInfo = (EmployeeInfo) map.get("employeeInfo");
+            if (employeeInfo != null) {
                 EntUserInfo entUserInfo = (EntUserInfo) map.get("userInfo");
                 if (entUserInfo == null) {
                     entUserInfo = enterpriseService.saveUserInfo(employeeInfo.getId(), enterpriseInfo.getId());
                 }
-                // 判断是否为管理员
-                if (roleId != -1) {
-                    EntUserRole entUserRole = new EntUserRole();
-                    entUserRole.setUserId(entUserInfo.getId());
-                    entUserRole.setRoleId(roleId);
-                    baseDao.save(entUserRole);
-                }
+                EntUserRole entUserRole = new EntUserRole();
+                entUserRole.setUserId(entUserInfo.getId());
+                entUserRole.setRoleId(roleId);
+                baseDao.save(entUserRole);
             } else {
                 msg = (String) map.get("msg");
             }

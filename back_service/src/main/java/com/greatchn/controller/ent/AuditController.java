@@ -8,6 +8,7 @@ import com.greatchn.po.EnterpriseInfo;
 import com.greatchn.po.TaxInfo;
 import com.greatchn.service.AuditService;
 import com.greatchn.service.ent.EnterpriseService;
+import com.greatchn.service.tax.TaxService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +34,9 @@ public class AuditController extends BaseController {
 
     @Resource
     RedisUtils redisUtils;
+
+    @Resource
+    TaxService taxService;
 
     /**
      * 校验是否管理员添加应用授权成功,授权成功返回企业id
@@ -176,6 +180,59 @@ public class AuditController extends BaseController {
             }
         }
     }
+
+    /**
+     * 根据corpId获取企业信息
+     */
+    @RequestMapping("/getTaxInfo")
+    @SuppressWarnings("unchecked")
+    public Result getTaxInfo(String corpId) {
+        Map<String, Object> map;
+        if (StringUtils.isEmpty(corpId)) {
+            return Result.fail("缺少必要参数");
+        } else {
+            Map<String, Object> redisMap = (Map<String, Object>) redisUtils.get(RedisUtils.REDIS_PREFIX_TAX + corpId);
+            TaxInfo taxInfo;
+            if (redisMap != null && !redisMap.isEmpty()) {
+                // 获取缓存中的信息
+                taxInfo = (TaxInfo) redisMap.get("taxInfo");
+            } else {
+                taxInfo = taxService.findTaxInfoByCorpId(corpId, null);
+            }
+            //查询企业信息，企业审核信息
+            if (taxInfo != null) {
+                map = new HashMap<>(3);
+                map.put("taxInfo", taxInfo);
+                // 查询该企业的审核信息
+                AuditInfo auditInfo = auditService.getAuditInfoByEntTaxId(taxInfo.getId(), null, "2");
+                String state = null;
+                if (auditInfo == null) {
+                    // 未提交审核
+                    state = "4";
+                } else if (StringUtils.equals(auditInfo.getState(), "0") || StringUtils.equals(auditInfo.getState(), "3") || StringUtils.equals(auditInfo.getState(), "2") || StringUtils.equals(auditInfo.getState(), "1")) {
+                    state = auditInfo.getState();
+                    // 未通过，放入审核未通过原因
+                    if (StringUtils.equals(auditInfo.getState(), "2")) {
+                        map.put("reason", auditInfo.getReason());
+                    }
+                }
+                // 更新缓存
+                if (redisMap == null) {
+                    redisMap = new HashMap<>(2);
+                }
+                redisMap.put("auditInfo", auditInfo);
+                redisMap.put("taxInfo", taxInfo);
+                // 更新缓存
+                redisUtils.set(RedisUtils.REDIS_PREFIX_ENT + corpId, redisMap);
+                map.put("auditState", state);
+                return Result.success(map);
+            } else {
+                // 该企业未授权，或已被作废
+                return Result.fail("该企业未授权或已被作废");
+            }
+        }
+    }
+
 
     /**
      * 获取企业审核结果

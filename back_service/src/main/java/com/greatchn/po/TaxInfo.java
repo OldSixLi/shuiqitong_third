@@ -35,6 +35,7 @@ public class TaxInfo implements Serializable {
     @Column(name = "CORP_ID")
     private String corpId;
 
+    @NotNull
     @Column(name = "STATE")
     private String state;
 
@@ -47,7 +48,6 @@ public class TaxInfo implements Serializable {
     @Column(name = "CANCEL_REASON")
     private String cancelReason;
 
-    @NotNull
     @Column(name = "URL")
     private String url;
 

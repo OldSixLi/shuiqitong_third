@@ -159,7 +159,7 @@ roleNames: "管理员,普通用户" -->
               this.$tip("修改用户角色成功！");
             } else {
               //错误提示
-              this.$tip(data.message||"操作失败,请重试！");
+              this.$alert(data.message||"操作失败,请重试！");
             }
           }).catch((err) => {
             //错误提示
@@ -184,7 +184,7 @@ roleNames: "管理员,普通用户" -->
                 if (data.success) {
                   this.$tip("重置密码操作成功，请提示该用户及时登陆web系统修改密码！", 3000);
                 } else {
-                  this.$tip(data.message || `操作失败,请重试！`);
+                  this.$alert(data.message || `操作失败,请重试！`);
                 }
               }).catch(() => {
                 this.$tip("请求服务失败,请重试！");

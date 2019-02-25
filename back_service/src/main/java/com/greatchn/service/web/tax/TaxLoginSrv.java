@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.DigestException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,17 +111,18 @@ public class TaxLoginSrv {
         return map;
     }
 
-    private static final String GET_WECHAT_USER_INFO = " https://qyapi.weixin.qq.com/cgi-bin/service/get_login_info?access_token=%S";
+    private static final String GET_USER_INFO_BY_QR_CODE = "https://qyapi.weixin.qq.com/cgi-bin/service/get_login_info?access_token=%s";
 
     /**
      * 第三方应用的扫码登录
      */
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> loginByQRCode(String authCode, String uuid, String oldToken) throws IOException, URISyntaxException {
         Map<String, Object> map = new HashMap<>(16);
         String msg = null;
         String returnFlag;
         String providerAccessToken = accessTokenService.getProviderAccessToken();
-        String url = String.format(GET_WECHAT_USER_INFO, providerAccessToken);
+        String url = String.format(GET_USER_INFO_BY_QR_CODE, providerAccessToken);
         Map<String, Object> params = new HashMap<>(1);
         params.put("auth_code", authCode);
         // 获取用户信息
@@ -133,7 +135,6 @@ public class TaxLoginSrv {
                 String userId = userInfo.getString("userid");
                 JSONObject corpInfo = jsonObject.getJSONObject("corp_info");
                 String corpId = corpInfo.getString("corpid");
-
                 Map<String, Object> executeMap = excuteLogin(corpId, userId, uuid, oldToken);
                 returnFlag = (String) executeMap.get("flag");
                 if (StringUtils.isNotBlank((String) executeMap.get("msg"))) {
@@ -162,6 +163,55 @@ public class TaxLoginSrv {
             msg = jsonObject == null ? "访问企业微信接口失败,请重试" : "访问企业微信错误：" + jsonObject.getString(Constant.WECHAT_ERROR_CODE_KEY) + "," + jsonObject.getString(Constant.WECHAT_ERROR_MSG_KEY);
         }
 
+        if (StringUtils.isNotEmpty(msg)) {
+            map.put("msg", msg);
+        }
+        map.put("flag", returnFlag);
+        return map;
+    }
+
+    private static final String GET_USER_INFO_BY_CODE = "https://qyapi.weixin.qq.com/cgi-bin/service/getuserinfo3rd?access_token=%s&code=%s";
+
+    /**
+     * 税务局第三方应用的登录
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> login(String code, String uuid, String oldToken) throws IOException, URISyntaxException {
+        Map<String, Object> map = new HashMap<>(16);
+        String returnFlag;
+        String msg = null;
+        String url = GET_USER_INFO_BY_CODE;
+        String accessToken = accessTokenService.getSuiteAccessToken(Constant.TAX_SUITE_ID, Constant.TAX_SUITE_SECRET);
+        url = String.format(url, accessToken, code);
+        String result = HttpUtils.requestByPost(url, "");
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        if (jsonObject != null && jsonObject.getIntValue(Constant.WECHAT_ERROR_CODE_KEY) == 0) {
+            // 获取corpId
+            String corpId = jsonObject.getString("CorpId");
+            // 获取userId
+            String userId = jsonObject.getString("UserId");
+            // 根据corpId查询税务分局信息
+            Map<String, Object> executeMap = excuteLogin(corpId, userId, uuid, oldToken);
+            returnFlag = (String) executeMap.get("flag");
+            if (StringUtils.isNotBlank((String) executeMap.get("msg"))) {
+                msg = (String) executeMap.get("msg");
+            }
+            map.put("corpId", corpId);
+            map.put("userId", userId);
+            map.put("manager", executeMap.get("manager"));
+            map.put("token", executeMap.get("token"));
+            map.put("userRight", executeMap.get("userRight"));
+            map.put("roles", executeMap.get("roles"));
+            map.put("employeeInfo", executeMap.get("employeeInfo"));
+            map.put("corpInfo", executeMap.get("corpInfo"));
+            if (StringUtils.equals("6", returnFlag)) {
+                map.put("reason", executeMap.get("reason"));
+            }
+        } else {
+            // 访问微信接口失败
+            returnFlag = "0";
+            msg = jsonObject == null ? "访问企业微信接口失败,请重试" : "访问企业微信错误：" + jsonObject.getString(Constant.WECHAT_ERROR_CODE_KEY) + "," + jsonObject.getString(Constant.WECHAT_ERROR_MSG_KEY);
+        }
         if (StringUtils.isNotEmpty(msg)) {
             map.put("msg", msg);
         }
@@ -408,7 +458,6 @@ public class TaxLoginSrv {
                             resultMap.put("roles", map.get("roles"));
                             resultMap.put("employeeInfo", map.get("employeeInfo"));
                             resultMap.put("corpInfo", map.get("corpInfo"));
-
                         }
                     } else {
                         // 未授权或已被作废
@@ -445,5 +494,148 @@ public class TaxLoginSrv {
         resultMap.put("flag", returnFlag);
         return resultMap;
     }
+
+    /**
+     * 保存员工信息
+     *
+     * @author zy 2018-9-19
+     **/
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> saveEmployeeInfo(String corpId, String userId, Integer taxId, String manager) throws IOException, URISyntaxException {
+        Map<String, Object> map = new HashMap<>(2);
+        String msg = null;
+        EmployeeInfo employeeInfo;
+        // 获取成员信息并保存
+        employeeInfo = enterpriseService.findEmplyeeInfo(corpId, userId);
+        if (employeeInfo == null) {
+            Map<String, Object> employeeMap = taxService.saveInitUserInfo(employeeInfo, corpId, userId, taxId);
+            msg = (String) employeeMap.get("msg");
+            if (StringUtils.isBlank(msg)) {
+                employeeInfo = (EmployeeInfo) employeeMap.get("employeeInfo");
+            }
+        }
+        if (employeeInfo != null) {
+            // 查询是否有用户信息，没有则增加用户信息
+            TaxUserInfo taxUserInfo = taxService.findUserInfo(employeeInfo.getId(), taxId);
+            if (taxUserInfo == null) {
+                taxUserInfo = taxService.saveUserInfo(employeeInfo.getId(), taxId);
+            }
+            // 查询当前用户是否有角色，若没有，增加当前用户角色为普通用户
+            List<Map<String, Object>> userRoleInfos = taxService.getUserRole(taxUserInfo.getId(), taxId);
+            if (userRoleInfos == null || userRoleInfos.size() <= 0) {
+                // 查询普通用户角色信息
+                TaxRoleInfo taxRoleInfo = taxService.findNormalRoleInfo(taxId, "update");
+                if (taxRoleInfo == null) {
+                    taxRoleInfo = new TaxRoleInfo();
+                    taxRoleInfo.setName(Constant.NORMAL_NAME);
+                    taxRoleInfo.setDescription(Constant.NORMAL_DESCRIPTION);
+                    taxRoleInfo.setTaxId(taxId);
+                    taxRoleInfo.setCreateTime(new Timestamp(System.currentTimeMillis()));
+                    taxRoleInfo.setCreator(0);
+                    baseDao.save(taxRoleInfo);
+                    // 保存普通用户角色的默认权限
+                    TaxRoleRight taxRoleRight = new TaxRoleRight();
+                    taxRoleRight.setRightName(Constant.TAX_ALL_ROLE_HAVE_RIGHT);
+                    taxRoleRight.setRoleId(taxRoleInfo.getId());
+                    baseDao.save(taxRoleRight);
+                }
+                // 保存用户角色信息
+                TaxUserRole taxUserRole = new TaxUserRole();
+                taxUserRole.setRoleId(taxRoleInfo.getId());
+                taxUserRole.setUserId(taxUserInfo.getId());
+                baseDao.save(taxUserRole);
+            }
+            // 若为管理员，查询是否有角色信息，没有直接添加
+            if (StringUtils.equals(manager, userId)) {
+                taxService.userAddManagerRole(taxUserInfo.getId(), taxId);
+            }
+            map.put("employeeInfo", employeeInfo);
+            map.put("userInfo", taxUserInfo);
+        }
+        map.put("msg", msg);
+        return map;
+    }
+
+
+    /**
+     * 重新获取用户角色、权限，并更新缓存
+     *
+     * @author zy 2018-9-25
+     */
+    @SuppressWarnings("unchecked")
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> getRoleAndRight(String token) throws IOException, URISyntaxException {
+        // 返回的结构
+        Map<String, Object> resultMap = new HashMap<>(3);
+        // 获取缓存中的角色信息，权限信息
+        Map<String, Object> map = (Map<String, Object>) redisUtils.get(token);
+        if (map != null && !map.isEmpty()) {
+            // 获取用户信息
+            TaxUserInfo userInfo = (TaxUserInfo) map.get("userInfo");
+            if (userInfo != null) {
+                TaxInfo taxInfo = null;
+                Map<String, Object> taxMap = (Map<String, Object>) redisUtils.get((String) map.get("taxInfoKey"));
+                if (taxMap != null && !taxMap.isEmpty()) {
+                    taxInfo = (TaxInfo) taxMap.get("taxInfo");
+                }
+                // 获取公司信息的管理员
+                if (taxInfo == null) {
+                    taxInfo = taxService.getTaxInfoById(userInfo.getTaxId());
+                    if (taxInfo != null && !StringUtils.equals(Constant.EFFECTIVE_STATE, taxInfo.getState())) {
+                        taxInfo = null;
+                    }
+                }
+                EmployeeInfo employeeInfo = (EmployeeInfo) map.get("employeeInfo");
+                if (employeeInfo != null && taxInfo != null && StringUtils.equals(taxInfo.getManager(), employeeInfo.getUserId())) {
+                    // 保存管理员的信息
+                    Map<String, Object> userInfoMap = saveEmployeeInfo(taxInfo.getCorpId(), taxInfo.getManager(), taxInfo.getId(), taxInfo.getManager());
+                    EmployeeInfo newEmployee = (EmployeeInfo) userInfoMap.get("employeeInfo");
+                    // 更新缓存Map中的userInfo信息
+                    if (newEmployee != null) {
+                        map.put("employeeInfo", newEmployee);
+                    }
+                    TaxUserInfo newTaxUserInfo = (TaxUserInfo) userInfoMap.get("userInfo");
+                    if (newTaxUserInfo != null) {
+                        map.put("userInfo", newTaxUserInfo);
+                    }
+                }
+                // 查询数据库中的角色
+                List<Map<String, Object>> roles = taxService.findUserRoleInfos(userInfo.getId(), userInfo.getTaxId());
+                // 更新角色、权限信息
+                List<Map<String, Object>> rights = taxService.getUserRight(userInfo.getId(), userInfo.getTaxId());
+                map.put("userRight", rights);
+                map.put("roles", roles);
+                // 是否为调试模式，若为调试则缓存不过期
+                if (Constant.IS_TEST) {
+                    redisUtils.set(token, map);
+                } else {
+                    redisUtils.set(token, map, Constant.ENT_TOKEN_TIME_OUT);
+                }
+                // 将权限名称直接拼接为数组
+                List<String> list = new ArrayList<>();
+                if (rights != null) {
+                    for (Map<String, Object> right : rights) {
+                        if (StringUtils.isNoneEmpty((String) right.get("rightName"))) {
+                            list.add((String) right.get("rightName"));
+                        }
+                    }
+                }
+                if (roles != null && roles.size() > 0) {
+                    resultMap.put("roles", roles);
+                }
+                if (list.size() > 0) {
+                    resultMap.put("right", list);
+                }
+            } else {
+                // token无效，该用户信息不存在
+                resultMap.put("msg", "token无效，该用户信息不存在");
+            }
+        } else {
+            // 登录已过期，需要重新登录
+            resultMap.put("msg", "登录已过期，需要重新登录");
+        }
+        return resultMap;
+    }
+
 
 }

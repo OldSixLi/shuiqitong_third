@@ -137,71 +137,78 @@ public class TaxUserMessageController extends BaseController {
         Map<String, Object> map = (Map<String, Object>) redisUtils.get(token);
         if (map != null && !map.isEmpty()) {
             TaxUserInfo userInfo = (TaxUserInfo) map.get("userInfo");
-            String url = "";
-            String title = "";
-            String content = "";
-            String corpIds = "";
-            List<Integer> roleIds = new ArrayList<>();
-            if (messageId != null || qnaId != null) {
-                if (messageId != null) {
-                    url = String.format(Constant.messageUrl, messageId);
-                    MessageInfo messageInfo = userMessageSrv.getMessageDetail(messageId);
-                    title = "【消息推送】" + messageInfo.getTitle();
-                    content = messageInfo.getContent();
-                    if (StringUtils.isNotEmpty(messageInfo.getRoleId())) {
-                        String[] roleId = messageInfo.getRoleId().split(",");
-                        for (int i = 0; i < roleId.length; i++) {
-                            roleIds.add(Integer.valueOf(roleId[i]));
+            Map<String, Object> taxMap = (Map<String, Object>) redisUtils.get((String) map.get("taxInfoKey"));
+            String taxInfoRedisKey = "taxInfo";
+            if (taxMap != null && !taxMap.isEmpty() && taxMap.get(taxInfoRedisKey) != null) {
+                TaxInfo taxInfo = (TaxInfo) taxMap.get("taxInfo");
+                String url = "";
+                String title = "";
+                String content = "";
+                String enterpriseIds = "";
+                List<Integer> roleIds = new ArrayList<>();
+                if (messageId != null || qnaId != null) {
+                    if (messageId != null) {
+                        url = String.format(Constant.messageUrl, messageId);
+                        MessageInfo messageInfo = userMessageSrv.getMessageDetail(messageId);
+                        title = "【消息推送】" + messageInfo.getTitle();
+                        content = messageInfo.getContent();
+                        if (StringUtils.isNotEmpty(messageInfo.getRoleId())) {
+                            String[] roleId = messageInfo.getRoleId().split(",");
+                            for (int i = 0; i < roleId.length; i++) {
+                                roleIds.add(Integer.valueOf(roleId[i]));
+                            }
                         }
+                        enterpriseIds = messageInfo.getEnterpriseId();
+                        userMessageSrv.updateMessage(messageInfo, userInfo.getId(), "1");
                     }
-                    corpIds = messageInfo.getEnterpriseId();
-                    userMessageSrv.updateMessage(messageInfo, userInfo.getId(), "1");
-                }
-                if (qnaId != null) {
-                    url = String.format(Constant.questionUrl, qnaId);
-                    QNAInfo qnaInfo = questionSrv.findQNA(qnaId);
-                    title = "【问卷调查】" + qnaInfo.getTitle();
-                    content = qnaInfo.getContent();
-                    if (StringUtils.isNotEmpty(qnaInfo.getRoleId())) {
-                        String[] roleId = qnaInfo.getRoleId().split(",");
-                        for (int i = 0; i < roleId.length; i++) {
-                            roleIds.add(Integer.valueOf(roleId[i]));
+                    if (qnaId != null) {
+                        url = String.format(Constant.questionUrl, qnaId);
+                        QNAInfo qnaInfo = questionSrv.findQNA(qnaId);
+                        title = "【问卷调查】" + qnaInfo.getTitle();
+                        content = qnaInfo.getContent();
+                        if (StringUtils.isNotEmpty(qnaInfo.getRoleId())) {
+                            String[] roleId = qnaInfo.getRoleId().split(",");
+                            for (int i = 0; i < roleId.length; i++) {
+                                roleIds.add(Integer.valueOf(roleId[i]));
+                            }
+                            for (int i = 0; i < roleId.length; i++) {
+                                roleIds.add(Integer.valueOf(roleId[i]));
+                            }
                         }
-                        for (int i = 0; i < roleId.length; i++) {
-                            roleIds.add(Integer.valueOf(roleId[i]));
-                        }
+                        enterpriseIds = qnaInfo.getEnterpriseId();
+                        questionSrv.updateQnaState(qnaInfo, userInfo.getId(), "5");
                     }
-                    corpIds = qnaInfo.getEnterpriseId();
-                    questionSrv.updateQnaState(qnaInfo, userInfo.getId(), "5");
-                }
-                String result = "";
-                if (StringUtils.isNotEmpty(corpIds)) {
-                    String[] corpId = corpIds.split(",");
-                    for (int i=0;i<corpId.length;i++){
+                    String result = "";
+                    if (StringUtils.isNotEmpty(enterpriseIds)) {
+                        String[] enterpriseId = enterpriseIds.split(",");
+                        for (int i = 0; i < enterpriseId.length; i++) {
+                            if (roleIds.size() > 0 && roleIds != null) {
+                                String role = "";
+                                for (Integer roleId : roleIds) {
+                                    role += roleId + "|";
+                                }
+                                result += restfulSrv.sendMessageOrQuestion(title, content, role.substring(0, role.length() - 1), url, enterpriseId[i],taxInfo.getId());
+                            } else {
+                                result = restfulSrv.sendMessageOrQuestion(title, content, null, url, enterpriseId[i],taxInfo.getId());
+                            }
+                        }
+                    } else {
                         if (roleIds.size() > 0 && roleIds != null) {
                             String role = "";
                             for (Integer roleId : roleIds) {
                                 role += roleId + "|";
                             }
-                            result += restfulSrv.sendMessageOrQuestion(title, content, role.substring(0, role.length() - 1), url, corpId[i]);
+                            result += restfulSrv.sendMessageOrQuestion(title, content, role.substring(0, role.length() - 1), url, null,taxInfo.getId());
                         } else {
-                            result = restfulSrv.sendMessageOrQuestion(title, content, null, url, corpId[i]);
+                            result = restfulSrv.sendMessageOrQuestion(title, content, null, url, null,taxInfo.getId());
                         }
                     }
+                    return Result.success(result);
                 } else {
-                    if (roleIds.size() > 0 && roleIds != null) {
-                        String role = "";
-                        for (Integer roleId : roleIds) {
-                            role += roleId + "|";
-                        }
-                        result += restfulSrv.sendMessageOrQuestion(title, content, role.substring(0, role.length() - 1), url, null);
-                    } else {
-                        result = restfulSrv.sendMessageOrQuestion(title, content, null, url, null);
-                    }
+                    return Result.fail("无消息id或无问卷id");
                 }
-                return Result.success(result);
             } else {
-                return Result.fail("无消息id或无问卷id");
+                return Result.fail("-1");
             }
         } else {
             return Result.fail("无用户信息");
@@ -246,27 +253,27 @@ public class TaxUserMessageController extends BaseController {
      */
     @RequestMapping("/receiptList")
     @SuppressWarnings("unchecked")
-    public Result receiptList(Page page, Integer messageId,@RequestHeader("token") String token) {
-        Map<String,Object> map = (Map<String, Object>) redisUtils.get(token);
-        if (map!=null && !map.isEmpty()){
+    public Result receiptList(Page page, Integer messageId, @RequestHeader("token") String token) {
+        Map<String, Object> map = (Map<String, Object>) redisUtils.get(token);
+        if (map != null && !map.isEmpty()) {
             Map<String, Object> mapTax = (Map<String, Object>) redisUtils.get(map.get("taxInfoKey").toString());
             String taxInfoRedisKey = "taxInfo";
             if (mapTax != null && !mapTax.isEmpty() && mapTax.get(taxInfoRedisKey) != null) {
                 TaxInfo taxInfo = (TaxInfo) mapTax.get(taxInfoRedisKey);
-                List<Map<String,Object>> list = new ArrayList<>();
-                List<Map<String,Object>> enterpriseList = new ArrayList<>();
+                List<Map<String, Object>> list = new ArrayList<>();
+                List<Map<String, Object>> enterpriseList = new ArrayList<>();
                 MessageInfo message = userMessageSrv.getMessageDetail(messageId);
                 String enterpriseIds = message.getEnterpriseId();
                 String roleIds = message.getRoleId();
-                if(StringUtils.isNotEmpty(enterpriseIds)){
+                if (StringUtils.isNotEmpty(enterpriseIds)) {
                     String[] enterpriseId = enterpriseIds.split(",");
                     String enterprise = "";
-                    for (int i = 0;i<enterpriseId.length;i++){
+                    for (int i = 0; i < enterpriseId.length; i++) {
                         enterprise += enterpriseId[i] + "|";
                     }
-                    enterpriseList = enterpriseSrv.getReceiptList(page,taxInfo.getId(),enterprise.substring(0,enterprise.length()-1));
+                    enterpriseList = enterpriseSrv.getReceiptList(page, taxInfo.getId(), enterprise.substring(0, enterprise.length() - 1));
                 } else {
-                    enterpriseList = enterpriseSrv.getList(page,taxInfo.getId());
+                    enterpriseList = enterpriseSrv.getList(page, taxInfo.getId());
                 }
                 String role = "";
                 if (StringUtils.isNotEmpty(roleIds)) {
@@ -275,12 +282,12 @@ public class TaxUserMessageController extends BaseController {
                         role += roleId[i] + "|";
                     }
                 }
-                for (Map<String,Object> enterprise : enterpriseList){
-                    List<Map<String,Object>> receipt = userMessageSrv.receiptList(messageId,Integer.valueOf(enterprise.get("enterpriseId").toString()),role.substring(0,role.length()-1));
-                    enterprise.put("receipt",receipt);
+                for (Map<String, Object> enterprise : enterpriseList) {
+                    List<Map<String, Object>> receipt = userMessageSrv.receiptList(messageId, Integer.valueOf(enterprise.get("enterpriseId").toString()), role.substring(0, role.length() - 1));
+                    enterprise.put("receipt", receipt);
                     list.add(enterprise);
                 }
-                SimplePage simplePage = new SimplePage(page,list);
+                SimplePage simplePage = new SimplePage(page, list);
                 return Result.success(simplePage);
             } else {
                 return Result.fail("无当前分局信息");

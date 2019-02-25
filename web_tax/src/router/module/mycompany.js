@@ -29,15 +29,15 @@ export default [{
           funPoint: "company-checked"
         },
       },
-      // {
-      //   path: "/company/checking",
-      //   name: "审核管理",
-      //   component: () => import("@/page/company/checkList.vue"),
-      //   meta: {
-      //     title: "审核管理",
-      //     funPoint: "company-checking"
-      //   }
-      // }
+      {
+        path: "/company/checking",
+        name: "待审核管理",
+        component: () => import("@/page/company/checkList.vue"),
+        meta: {
+          title: "待审核管理",
+          // funPoint: "company-checking"
+        }
+      }
     ]
   }
 

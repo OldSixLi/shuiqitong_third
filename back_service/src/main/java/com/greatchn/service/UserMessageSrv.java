@@ -215,7 +215,7 @@ public class UserMessageSrv {
      * @date 2018-09-15 14:13
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveMessage(Integer messageId, String type, String title, String content, Integer userId, String roleIds, Integer taxId, String corpId) {
+    public void saveMessage(Integer messageId, String type, String title, String content, Integer userId, String roleIds, Integer taxId, String enterpriseIds) {
         MessageInfo messageInfo = new MessageInfo();
         if (messageId != null) {
             messageInfo = getMessageDetail(messageId);
@@ -232,8 +232,8 @@ public class UserMessageSrv {
         }
         messageInfo.setState("0");
         messageInfo.setTaxId(taxId);
-        if (StringUtils.isNotEmpty(roleIds)){
-            messageInfo.setEnterpriseId(corpId);
+        if (StringUtils.isNotEmpty(enterpriseIds)){
+            messageInfo.setEnterpriseId(enterpriseIds);
         }
         baseDao.saveOrUpdate(messageInfo);
     }
@@ -332,7 +332,7 @@ public class UserMessageSrv {
      * @date 2018-09-15 13:15
      */
     @Transactional(rollbackFor = Exception.class)
-    public String saveAndSend(String type, String title, String content, Integer userId, String roleIds, Integer taxId, String corpIds) throws Exception {
+    public String saveAndSend(String type, String title, String content, Integer userId, String roleIds, Integer taxId, String enterpriseIds) throws Exception {
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setType(type);
         messageInfo.setTitle(title);
@@ -345,25 +345,25 @@ public class UserMessageSrv {
         }
         messageInfo.setState("1");
         messageInfo.setTaxId(taxId);
-        if (StringUtils.isNotEmpty(corpIds)){
-            messageInfo.setEnterpriseId(corpIds);
+        if (StringUtils.isNotEmpty(enterpriseIds)){
+            messageInfo.setEnterpriseId(enterpriseIds);
         }
         baseDao.save(messageInfo);
         Integer messageId = messageInfo.getId();
         String[] roleId = roleIds.split(",");
         String result = "";
         String url = String.format(Constant.messageUrl, messageId);
-        if (StringUtils.isNotEmpty(corpIds)){
-            String[] corpId = corpIds.split(",");
-            for (int i =0;i<corpId.length;i++){
+        if (StringUtils.isNotEmpty(enterpriseIds)){
+            String[] enterpriseId = enterpriseIds.split(",");
+            for (int i =0;i<enterpriseId.length;i++){
                 if (StringUtils.isNotEmpty(roleIds)) {
                     String role = "";
                     for (int j = 0; j < roleId.length; j++) {
                         role += roleId[j] + "|";
                     }
-                    result += restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, role.substring(0, role.length() - 1), url,corpId[i]);
+                    result += restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, role.substring(0, role.length() - 1), url,enterpriseId[i],taxId);
                 } else {
-                    result = restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, null, url,corpId[i]);
+                    result = restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, null, url,enterpriseId[i],taxId);
                 }
             }
         } else {
@@ -372,9 +372,9 @@ public class UserMessageSrv {
                 for (int i = 0; i < roleId.length; i++) {
                     role += roleId[i] + "|";
                 }
-                result += restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, role.substring(0, role.length() - 1), url,null);
+                result += restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, role.substring(0, role.length() - 1), url,null,taxId);
             } else {
-                result = restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, null, url,null);
+                result = restfulSrv.sendMessageOrQuestion("【消息推送】" + title, content, null, url,null,taxId);
             }
         }
         return result;

@@ -151,7 +151,7 @@ public class UserCenterController extends BaseController {
                 return Result.success(userCenterSrv.checkLoginAccount(account));
             } else {
                 //账号密码只能数字、字母、下划线以外的字符,账号长度不小于1，密码长度不小于6，密码的第一个不能为数字
-                return Result.fail("账号不符合规则！");
+                return Result.fail("账号只能包含字母、数字,长度不小于6位！");
             }
         } else {
             return Result.fail("缺少必要参数");

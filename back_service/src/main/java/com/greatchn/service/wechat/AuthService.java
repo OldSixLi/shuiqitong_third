@@ -8,6 +8,9 @@ import com.greatchn.common.utils.HttpUtils;
 import com.greatchn.common.utils.RedisUtils;
 import com.greatchn.po.EnterpriseInfo;
 import com.greatchn.po.TaxInfo;
+import com.greatchn.service.ent.EnterpriseService;
+import com.greatchn.service.tax.TaxService;
+import com.sun.tools.javac.comp.Enter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,12 @@ public class AuthService {
 
     @Resource
     AccessTokenService accessTokenService;
+
+    @Resource
+    TaxService taxService;
+
+    @Resource
+    EnterpriseService enterpriseService;
 
     /**
      * 控制台日志对象
@@ -96,27 +105,23 @@ public class AuthService {
         if (!StringUtils.equals(Constant.GET_INFO_TYPE_TAX, type)) {
             //获取成功，保存公司信息
             if (enterpriseInfo != null && StringUtils.isEmpty(msg)) {
-                // 将有效的授权信息作废，重新添加授权信息（即删除第三方应用后重新添加应用）
-                cancelAuthUpdateEntOrTax(enterpriseInfo.getCorpId(), Constant.GET_INFO_TYPE_ENT);
-                // 若企业无有效的授权信息，直接添加授权信息
+                // 保存或更新企业信息
                 enterpriseInfo.setState("Y");
-                baseDao.save(enterpriseInfo);
+                saveOrUpdateEntOrTax(enterpriseInfo.getCorpId(), Constant.GET_INFO_TYPE_ENT, enterpriseInfo, null);
                 // 将企业信息放入缓存
                 redisUtils.set(RedisUtils.REDIS_PREFIX_ENT + enterpriseInfo.getCorpId(), enterpriseInfo);
-                // 企业acess_token的有效期（企业微信返回的有效期为2小时，提前3分钟过期重新获取）
+                // 企业accessToken的有效期（企业微信返回的有效期为2小时，提前3分钟过期重新获取）
                 Long expiresIn = jsonObject.getLong("expires_in");
                 expiresIn = expiresIn - Constant.ACCESS_TOKEN_ADVANCE_TIME;
-                // 企业的acess_token,放入缓存
+                // 企业的accessToken,放入缓存
                 redisUtils.set(RedisUtils.REDIS_PREFIX_ENT + enterpriseInfo.getCorpId() + "accessToken", jsonObject.getString("access_token"), expiresIn);
             }
         } else {
             // 获取成功保存税务分局信息
             if (taxInfo != null && StringUtils.isEmpty(msg)) {
-                // 将有效的税务局信息作废，重新添加税务局信息（即删除第三方应用后重新添加应用）
-                cancelAuthUpdateEntOrTax(taxInfo.getCorpId(), Constant.GET_INFO_TYPE_TAX);
-                // 若企业无有效的税务局信息，直接添加税务局信息
+                // 保存或更新税务分局信息
                 taxInfo.setState("Y");
-                baseDao.save(taxInfo);
+                saveOrUpdateEntOrTax(taxInfo.getCorpId(), Constant.GET_INFO_TYPE_TAX, null, taxInfo);
                 // 将税务分局信息放入缓存
                 redisUtils.set(RedisUtils.REDIS_PREFIX_TAX + taxInfo.getCorpId(), taxInfo);
                 // 税务分局acess_token的有效期（企业微信返回的有效期为2小时，提前3分钟过期重新获取）
@@ -147,6 +152,37 @@ public class AuthService {
         baseDao.executeSQL(sql, corpId);
     }
 
+    /**
+     * 保存或更新用户的授权信息（agentId,permanentCode）
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void saveOrUpdateEntOrTax(String corpId, String type, EnterpriseInfo enterpriseInfo, TaxInfo taxInfo) {
+        // 判断需要作废信息的类型
+        if (StringUtils.equals(Constant.GET_INFO_TYPE_TAX, type)) {
+            // 查询所有该税务局的有效信息
+            TaxInfo oldTaxInfo = taxService.findTaxInfoByCorpId(corpId, null);
+            if (oldTaxInfo != null) {
+                // 存在且有效的已授权的信息
+                oldTaxInfo.setPermanentCode(taxInfo.getPermanentCode());
+                oldTaxInfo.setAgentId(taxInfo.getAgentId());
+                baseDao.update(oldTaxInfo);
+                logger.info("更新税务分局信息");
+            } else {
+                baseDao.save(taxInfo);
+                logger.info("保存税务分局信息");
+            }
+        } else {
+            // 查询所有该企业的有效信息
+            EnterpriseInfo oldEnterpriseInfo = enterpriseService.findEnterpriseByCorpId(corpId, null);
+            if (oldEnterpriseInfo != null) {
+                oldEnterpriseInfo.setAgentId(enterpriseInfo.getAgentId());
+                oldEnterpriseInfo.setPermanentCode(enterpriseInfo.getPermanentCode());
+                baseDao.update(oldEnterpriseInfo);
+            } else {
+                baseDao.save(enterpriseInfo);
+            }
+        }
+    }
 
     /**
      * 解析临时授权码获取到税务分局基础信息

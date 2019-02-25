@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -331,7 +333,7 @@ public class TaxRoleManageController extends BaseController {
      */
     @RequestMapping("/transformAdministrator")
     @SuppressWarnings("unchecked")
-    public Result transformAdministrator(String userId, @RequestHeader(name = "token") String token) {
+    public Result transformAdministrator(String userId, @RequestHeader(name = "token") String token) throws IOException, URISyntaxException {
         if (StringUtils.isBlank(userId)) {
             return Result.fail("缺少必要参数");
         }
@@ -343,9 +345,9 @@ public class TaxRoleManageController extends BaseController {
             EmployeeInfo employeeInfo = (EmployeeInfo) map.get("employeeInfo");
             if (userInfo != null && employeeInfo != null) {
                 TaxInfo taxInfo = null;
-                Map<String, Object> entMap = (Map<String, Object>) redisUtils.get((String) map.get("taxInfoKey"));
-                if (entMap != null && !entMap.isEmpty()) {
-                    taxInfo = (TaxInfo) entMap.get("taxInfo");
+                Map<String, Object> taxMap = (Map<String, Object>) redisUtils.get((String) map.get("taxInfoKey"));
+                if (taxMap != null && !taxMap.isEmpty()) {
+                    taxInfo = (TaxInfo) taxMap.get("taxInfo");
                 }
                 // 获取公司信息的管理员
                 if (taxInfo == null) {
@@ -353,11 +355,21 @@ public class TaxRoleManageController extends BaseController {
                 }
                 if (taxInfo != null && StringUtils.equals(Constant.EFFECTIVE_STATE, taxInfo.getState())) {
                     if (StringUtils.equals(employeeInfo.getUserId(), taxInfo.getManager())) {
-                        // 保存该用户为管理员
-
-                        // 返回保存结果
-
-                        return Result.success("");
+                        Map<String,Object> resultMap=taxRoleManageSrv.initEmployeeInfoAndTransform(taxInfo.getCorpId(),userId,taxInfo.getId());
+                        String msg=(String)resultMap.get("msg");
+                        if(StringUtils.isNotBlank(msg)){
+                            return Result.fail(msg);
+                        }else{
+                            // 更新当前用户的缓存
+                            map.put("userRight", resultMap.get("userRight"));
+                            map.put("roles", resultMap.get("roles"));
+                            if(Constant.IS_TEST){
+                                redisUtils.set(token,map);
+                            }else{
+                                redisUtils.set(token,map,Constant.ENT_TOKEN_TIME_OUT);
+                            }
+                            return Result.success("");
+                        }
                     } else {
                         return Result.fail("您不是管理员，不能使用该功能！");
                     }

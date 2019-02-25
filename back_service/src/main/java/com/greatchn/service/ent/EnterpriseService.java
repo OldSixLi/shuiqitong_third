@@ -194,12 +194,12 @@ public class EnterpriseService {
             String userSql = "select eri.Id as roleId," +
                     "eri.`NAME` as roleName," +
                     "eri.DESCRIPTION as description," +
-                    "ei.USER_ID as userId," +
-                    "ei.`NAME` as userName " +
+                    "a.userId," +
+                    "a.userName " +
                     "from ent_role_info eri " +
-                    "LEFT JOIN ent_user_role eur ON eur.ROLE_ID = eri.ID " +
-                    "LEFT JOIN ent_user_info eui ON eur.USER_ID = eui.ID and eui.ENTERPRISE_ID=? " +
-                    "LEFT JOIN employee_info ei ON ei.ID = eui.EMPLOYEE_ID  " +
+                    "LEFT JOIN (select eur.ROLE_ID as roleId,ei.USER_ID as userId,ei.`NAME` as userName from ent_user_role eur " +
+                    "JOIN ent_user_info eui ON eur.USER_ID = eui.ID and eui.ENTERPRISE_ID=? " +
+                    "JOIN employee_info ei ON ei.ID = eui.EMPLOYEE_ID) as a ON a.roleId=eri.ID " +
                     "where eri.`NAME`<>'" + Constant.MANAGER_NAME + "' and eri.`NAME`<>'" + Constant.NORMAL_NAME + "' GROUP BY eri.ID";
             Map<String, Type> types = new HashMap<>(5);
             // 角色id

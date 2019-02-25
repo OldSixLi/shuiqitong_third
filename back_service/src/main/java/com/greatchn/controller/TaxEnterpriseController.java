@@ -7,7 +7,10 @@ import com.greatchn.bean.SimplePage;
 import com.greatchn.common.annotation.LoginRequired;
 import com.greatchn.common.utils.RedisUtils;
 import com.greatchn.po.TaxInfo;
+import com.greatchn.po.TaxUserInfo;
+import com.greatchn.po.TaxUserRole;
 import com.greatchn.service.EnterpriseSrv;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -84,4 +87,36 @@ public class TaxEnterpriseController extends BaseController {
             return Result.fail("缺少必要参数");
         }
     }
+
+/*    public Result myEnterpriseList(Page page,@RequestHeader("token") String token){
+        Map<String,Object> map = (Map<String, Object>) redisUtils.get(token);
+        if (map != null && !map.isEmpty()) {
+            TaxUserInfo userInfo = (TaxUserInfo) map.get("userInfo");
+            Map<String, Object> mapTax = (Map<String, Object>) redisUtils.get(map.get("taxInfoKey").toString());
+            String taxInfoRedisKey = "taxInfo";
+            if (mapTax != null && !mapTax.isEmpty() && mapTax.get(taxInfoRedisKey) != null) {
+                TaxInfo taxInfo = (TaxInfo) mapTax.get(taxInfoRedisKey);
+                if(StringUtils.isNotEmpty(userInfo.getId().toString())){
+                    List<TaxUserRole> userRoles = enterpriseSrv.findUserRole(Integer.valueOf(userInfo.getId().toString()));
+                    String roleId = "";
+                    for (TaxUserRole userRole : userRoles){
+                        if (userRole.getRoleId()==1){
+                            roleId = "1";
+                        } else {
+                            roleId += userRole.getRoleId()+"|";
+                        }
+                    }
+                    if (roleId=="1"){
+
+                    } else {
+
+                    }
+                }
+            } else {
+                return Result.fail("无用户信息");
+            }
+        } else {
+            return Result.fail("无用户信息");
+        }
+    }*/
 }
